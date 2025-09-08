@@ -1,15 +1,15 @@
 
 import express from 'express'
-import { helloWorld } from './routes.js'
-import { Router } from 'express'
-
+import { UserLogin } from './routes.js'
 const app = express()
 const PORT = 3000
 
 
 app.use(express.json())
 
-app.get("/", helloWorld)
+app.route("/login")
+    .post(UserLogin)
+
 
 
 
