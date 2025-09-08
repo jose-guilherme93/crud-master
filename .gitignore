@@ -1,0 +1,15 @@
+# Ignora a pasta de dependências
+node_modules/
+
+# Ignora arquivos de ambiente
+.env
+
+# Ignora logs
+*.log
+
+# Ignora arquivos de build
+dist/
+build/
+
+# Ignora configurações de IDE
+.vscode/
