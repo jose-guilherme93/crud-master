@@ -16,9 +16,9 @@ the best crud in the world
         [] autenticação com google opcional
         [] Implementar rotas:
 
-        [] POST /auth/register
+        [] POST /register
 
-        [x] POST /auth/login
+        [x] POST /login
 
         [x] Gerar JWT
         [] validar JWT
@@ -61,7 +61,7 @@ the best crud in the world
 
         [] Criar mensagens de erro claras
 
-7. 🚀 Deploy (opcional)
+7. 🚀 Deploy
         [] Criar arquivo Procfile para Heroku (ou usar Render/Vercel)
 
         [] Configurar variáveis de ambiente no servidor
