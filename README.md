@@ -12,18 +12,18 @@ the best crud in the world
         [] Criar estrutura de pastas (routes, models, controllers, middleware)
 
 2. 🔐 Autenticação de Usuário
-        [] Criar modelo User com username, email, passwordHash
+        [x] Criar modelo User com username, email, passwordHash
         [] autenticação com google opcional
-        [] Implementar rotas:
+        [x] Implementar rotas:
 
-        [] POST /register
+        [x] POST /register
 
         [x] POST /login
 
         [x] Gerar JWT
-        [] validar JWT
+        [x] validar JWT
 
-        [] Criar middleware authMiddleware para proteger rotas privadas
+        [x] Criar middleware verifyToken para proteger rotas privadas
 
 3. 📝 Postagens de Jogos
         [] Criar modelo Post com:

@@ -1,6 +1,6 @@
 
 import express from 'express'
-import { UserLogin, UserRegister } from './routes.js'
+import { profile, userLogin, userRegister, verifyToken } from './routes.js'
 const app = express()
 const PORT = 3000
 
@@ -8,12 +8,15 @@ const PORT = 3000
 app.use(express.json())
 
 app.route("/login")
-    .post(UserLogin)
+    .post(userLogin)
 
 app.route("/register")
-    .post(UserRegister)
+    .post(userRegister)
 
+app.route("/profile", )
+.post(verifyToken, profile)
 
 app.listen(PORT, () => {
     console.log("server is running")
-} )
+
+})
