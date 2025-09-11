@@ -5,11 +5,13 @@ import { userRegister } from './routes/register.js'
 import { verifyToken } from './utils/middlewares.js'
 import { profile } from './routes/profile.js'
 
+
 const app = express()
 const PORT = 3000
 
-
 app.use(express.json())
+app.route("/")
+    .get()
 
 app.route("/login")
     .post(userLogin)
@@ -18,7 +20,7 @@ app.route("/register")
     .post(userRegister)
 
 app.route("/profile", )
-.post(verifyToken, profile)
+    .get(verifyToken, profile)
 
 
 app.listen(PORT, () => {

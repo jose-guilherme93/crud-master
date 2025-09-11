@@ -12,8 +12,11 @@ the best crud in the world
         [] Criar estrutura de pastas (routes, models, controllers, middleware)
 
 2. 🔐 Autenticação de Usuário
+
         [x] Criar modelo User com username, email, passwordHash
-        [] autenticação com google opcional
+
+        [ ] autenticação com google opcional
+        
         [x] Implementar rotas:
 
         [x] POST /register
