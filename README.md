@@ -7,9 +7,14 @@ the best crud in the world
 
         [x] Configurar dotenv para variáveis de ambiente
 
-        [] Conectar ao Postgree
+        [x] Conectar ao Postgree
 
-        [] Criar estrutura de pastas (routes, models, controllers, middleware)
+        [] Criar estrutura de pastas 
+                
+        [x] routes 
+        [ ] models
+        [ ] controllers
+        [x] middleware
 
 2. 🔐 Autenticação de Usuário
 

@@ -10,8 +10,7 @@ const app = express()
 const PORT = 3000
 
 app.use(express.json())
-app.route("/")
-    .get()
+
 
 app.route("/login")
     .post(userLogin)

@@ -13,3 +13,5 @@ build/
 
 # Ignora configurações de IDE
 .vscode/
+
+insertMassive.js
