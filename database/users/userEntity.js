@@ -15,7 +15,7 @@ const createUsersTable = `
     password VARCHAR(255) NOT NULL,
     avatar VARCHAR(255) NULL,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    deleted_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    deleted_at TIMESTAMP NOT NULL,
     updated_at TIMESTAMP NOT NULL DEFAULT NOW()
     )
 `

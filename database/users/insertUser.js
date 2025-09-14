@@ -1,13 +1,11 @@
 import dotenv from 'dotenv'
-import { Pool } from 'pg'
 import crypto, { randomUUID } from 'crypto'
+import { pool } from '../connectDatabase'
 
 dotenv.config()
 
 const id = randomUUID()
-const pool = new Pool({
-    connectionString: process.env.DATABASE_URL
-})
+
 
 const newUser = {
     id: id,
