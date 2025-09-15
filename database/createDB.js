@@ -8,16 +8,15 @@ const client = new Client({
   password: process.env.PGPASSWORD,
   host: process.env.PGHOST,
   port: process.env.PGPORT,
-  database: 'postgres'
+  database: process.env.PGDATABASE
 });
 
-const databaseName = 'crud';
 
 async function main() {
   try {
     await client.connect();
-    await client.query(`CREATE DATABASE ${databaseName}`);
-    console.log(`Banco de dados "${databaseName}" criado com sucesso!`);
+    await client.query(`CREATE DATABASE ${client.database}`);
+    console.log(`Banco de dados "${client.database}" criado com sucesso!`);
   } catch (error) {
     console.error('Erro ao criar banco:', error.message);
   } finally {

@@ -9,16 +9,16 @@ const enumStatusQuery = `
     'Jogando',
     'Zerado',
     'Quero jogar',
-    'Abandonado',
+    'Abandonado'
     );
 `
 
-const gameQuery = `
+const gameCreateQuery = `
     CREATE TABLE IF NOT EXISTS "games"(
     title VARCHAR(255),
     game_id VARCHAR(255) PRIMARY KEY,
     rating DECIMAL(3,1) CHECK (rating >= 0 AND rating <= 10),
-    status VARCHAR(20) CHECK (status IN ('Jogando', 'Zerado', 'Quero jogar', 'Abandonado')),
+    status game_status,
     review VARCHAR(5000),
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
@@ -37,8 +37,11 @@ const gameQuery = `
 
 const main = async () => {
     try {
-        const response = await pool.query(gameQuery)
-        console.log(response)
+        const responseEnumStatusQuery = await pool.query(enumStatusQuery )
+        console.log(responseEnumStatusQuery.rows)
+
+        const responseGameCreateQuery = await pool.query(gameCreateQuery)
+        console.log(responseGameCreateQuery.rows)
     } catch (error) {
         console.log(error)
     }    
