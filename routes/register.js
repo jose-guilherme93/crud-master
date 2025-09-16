@@ -4,16 +4,16 @@ import {users} from "../mockData.js"
 
 
 export const userRegister = (req, res) => {
-    const body = req.body
+    const {username, email, password, avatar} = req.body
     
     const newUser = {
         id: crypto.randomUUID(),
-        username: body.username,
-        email: body.email,
-        password: body.password,
-        avatar: body.avatar,
+        username,
+        email,
+        password,
+        avatar,
     }
-    if(!body || !body.email || !body.password ||!body.username ) {
+    if(!email || !password ||!username) {
         return res.status(401).send("dados imcompletos")
     }
 
@@ -28,25 +28,34 @@ export const userRegister = (req, res) => {
     const {id, username, email, password, avatar} = newUser
 
     try {
-        const response = await pool.query(query, [id, username, email, password, avatar])
-        if( body.email === response.email || body.username === response.username ) {
-            
-            
-            return console.log("email já registrado")
+        const existingUser = await pool.query(`
+            SELECT * FROM users
+            WHERE email = $1 OR username = $2`, 
+            [email, username]
+        )
 
+        if( existingUser.rows.length > 0 ) {
+            
+            return res.status(409).send("email ou username já registrado")
+            
         }
-        console.log("usuário inserido:", response.rows[0])
-        return res.status(201).json(JSON.stringify(response.rows[0]))
+
+        const response = await pool.query(query, [id, username, email, password, avatar])
+        
+        res.status(201).json({
+            message: "usuário cadastrado com sucesso",
+            id:response.rows[0].id})
     }
-
-
+    
+    
     catch (error) {
         console.log(error)
     }
-
+    
 }
-
 insertUser()
+
+
 
 }
 
