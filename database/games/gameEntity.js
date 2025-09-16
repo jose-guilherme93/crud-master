@@ -15,8 +15,8 @@ const enumStatusQuery = `
 
 const gameCreateQuery = `
     CREATE TABLE IF NOT EXISTS "games"(
+    id VARCHAR(255) PRIMARY KEY,
     title VARCHAR(255),
-    game_id VARCHAR(255) PRIMARY KEY,
     rating DECIMAL(3,1) CHECK (rating >= 0 AND rating <= 10),
     status game_status,
     review VARCHAR(5000),
@@ -26,14 +26,6 @@ const gameCreateQuery = `
     );
 
 `
-
-// pool.query(enumStatusQuery)
-// .then(response => console.log(response))
-// .then(pool.query(gameQuery))
-// .then(console.log("query bem sucedida"))
-// .catch(error => console.log("error: ", error))
-// .finally(pool.end())
-
 
 const main = async () => {
     try {
