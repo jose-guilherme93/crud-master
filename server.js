@@ -4,6 +4,7 @@ import { userLogin } from './routes/login.js'
 import { userRegister } from './routes/register.js'
 import { verifyToken } from './utils/middlewares.js'
 import { profile } from './routes/profile.js'
+import { logger } from './logger.js'
 
 
 const app = express()
@@ -23,6 +24,6 @@ app.route("/profile", )
 
 
 app.listen(PORT, () => {
-    console.log("server is running")
+    logger.info("server is running")
 
 })

@@ -1,7 +1,7 @@
 import dotenv from "dotenv"
 import { Pool } from "pg"
 dotenv.config()
-
+import { logger } from '../../logger.js'
 
 const poll = new Pool({
     connectionString: process.env.DATABASE_URL
@@ -24,10 +24,10 @@ const main = async () => {
     try {
 
         await poll.query(createUsersTable)
-        console.log("tabela criada com sucesso")
+        logger.info("tabela criada com sucesso")
         
     } catch (err) {
-        console.error(err)
+        logger.warn(err)
     }
 } 
 

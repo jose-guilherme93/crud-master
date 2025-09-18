@@ -1,6 +1,7 @@
 import { users } from "../mockData.js";
 import dotenv from 'dotenv'
 import jwt from 'jsonwebtoken'
+import { logger } from "../logger.js";
 
 dotenv.config()
 export const userLogin = (req,res) => {
@@ -11,7 +12,7 @@ export const userLogin = (req,res) => {
     }
 
     const userMatch = users.find(user => user.email)?.email;
-    console.log("userMatch:", userMatch)
+    logger.info("userMatch:", userMatch)
 
     const JWT_TOKEN = process.env.JSON_WEB_TOKEN
     

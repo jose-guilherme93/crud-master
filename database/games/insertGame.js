@@ -1,6 +1,6 @@
 
 import { pool } from "../connectDatabase.js";
-
+import { logger } from '../../logger.js'
 import dotenv from "dotenv"
 dotenv.config()
 
@@ -29,9 +29,9 @@ const {id, title, rating, status, review} = newGame
 const insertGameInPool = async () => {
     try {
         const responseInsertGameQuery = await pool.query(insertGameQuery, [id, title, rating, status, review])
-        console.log(responseInsertGameQuery.rows)
+        logger.info(responseInsertGameQuery.rows)
     } catch (error) {
-        console.log(error)
+        logger.info(error)
     }
 }
 

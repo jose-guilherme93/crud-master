@@ -1,5 +1,6 @@
 import dotenv from 'dotenv';
 import { Client } from 'pg';
+import { logger } from '../logger';
 
 dotenv.config();
 
@@ -16,7 +17,7 @@ async function main() {
   try {
     await client.connect();
     await client.query(`CREATE DATABASE ${client.database}`);
-    console.log(`Banco de dados "${client.database}" criado com sucesso!`);
+    logger.info(`Banco de dados "${client.database}" criado com sucesso!`);
   } catch (error) {
     console.error('Erro ao criar banco:', error.message);
   } finally {

@@ -1,6 +1,6 @@
 import { pool } from '../connectDatabase.js'
 import dotenv from 'dotenv'
-
+import { logger } from '../../logger.js'
 dotenv.config()
 
 const enumStatusQuery = `
@@ -30,12 +30,12 @@ const gameCreateQuery = `
 const main = async () => {
     try {
         const responseEnumStatusQuery = await pool.query(enumStatusQuery )
-        console.log(responseEnumStatusQuery.rows)
+        logger.info(responseEnumStatusQuery.rows)
 
         const responseGameCreateQuery = await pool.query(gameCreateQuery)
-        console.log(responseGameCreateQuery.rows)
+        logger.info(responseGameCreateQuery.rows)
     } catch (error) {
-        console.log(error)
+        logger.info(error)
     }    
 }
 

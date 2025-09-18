@@ -1,7 +1,7 @@
 import dotenv from 'dotenv'
 import crypto, { randomUUID } from 'crypto'
 import { pool } from '../connectDatabase'
-
+import { logger } from '../../logger.js'
 dotenv.config()
 
 const id = randomUUID()
@@ -26,9 +26,9 @@ const insertUser = async () => {
     
     try {
         const response = await pool.query(query, [id, username, email, password, avatar])
-        console.log("usuário inserido:", response.rows[0])
+        logger.info("usuário inserido:", response.rows[0])
     } catch (error) {
-        console.log(error)
+        logger.info(error)
     }   finally {
         await pool.end()
     }
