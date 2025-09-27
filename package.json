@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest",
     "start": "node server.js --watch"
   },
   "keywords": [],
@@ -18,5 +18,8 @@
     "jsonwebtoken": "^9.0.2",
     "pg": "^8.16.3",
     "winston": "^3.17.0"
+  },
+  "devDependencies": {
+    "vitest": "^3.2.4"
   }
 }

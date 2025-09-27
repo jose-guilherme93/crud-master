@@ -28,7 +28,7 @@ const gameCreateQuery = `
 `
 const checkTypeStatus = `SELECT * FROM pg_type WHERE typname = 'game_status';`
 
-const createType = async () => {
+export const createType = async () => {
     try {
 
 
@@ -52,7 +52,7 @@ const createType = async () => {
 
 createType()
 
-const createTable = async () => {
+export const createTable = async () => {
     try {
 
 const checkTableGames = `SELECT 1 FROM information_schema.tables WHERE table_name = 'games' AND table_schema = 'public';
