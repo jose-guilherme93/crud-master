@@ -26,17 +26,50 @@ const gameCreateQuery = `
     );
 
 `
+const checkTypeStatus = `SELECT * FROM pg_type WHERE typname = 'game_status';`
 
-const main = async () => {
+const createType = async () => {
     try {
-        const responseEnumStatusQuery = await pool.query(enumStatusQuery )
-        logger.info(responseEnumStatusQuery.rows)
 
-        const responseGameCreateQuery = await pool.query(gameCreateQuery)
-        logger.info(responseGameCreateQuery.rows)
+
+
+        const responseEnumStatusQuery = await pool.query(checkTypeStatus)
+        if (responseEnumStatusQuery.rows.length > 0) {
+            logger.info("tipagem existente no banco, ignorando condição")
+
+        } else {
+            logger.info("tipagem criada com sucesso")
+        }
+
+
+        
+       
+
     } catch (error) {
         logger.info(error)
     }    
 }
 
-main()
+createType()
+
+const createTable = async () => {
+    try {
+
+const checkTableGames = `SELECT 1 FROM information_schema.tables WHERE table_name = 'games' AND table_schema = 'public';
+`;
+
+const responseTableCheck = await pool.query(checkTableGames);
+
+    if (responseTableCheck.rows.length > 0) {
+        logger.info("Tabela 'games' já existe. Pulando criação.");
+} else {
+   const responseGameCreateQuery = await pool.query(gameCreateQuery)
+        console.log(responseGameCreateQuery)
+        logger.info(JSON.stringify(responseGameCreateQuery.rows, null, 2))
+}
+    }
+ catch (error) {
+    logger.error(error)
+}}
+
+createTable()
