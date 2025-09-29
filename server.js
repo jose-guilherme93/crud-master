@@ -5,13 +5,14 @@ import { userRegister } from './routes/register.js'
 import { verifyToken } from './utils/middlewares.js'
 import { profile } from './routes/profile.js'
 import { logger } from './logger.js'
+import userRoutes from './routes/userRoutes.js'
 
 
 const app = express()
 const PORT = 3000
 
 app.use(express.json())
-
+app.use("/users", userRoutes)
 
 app.route("/login")
     .post(userLogin)

@@ -1,7 +1,6 @@
 
 import { pool } from "../database/connectDatabase.js"
 import { logger } from "../logger.js"
-import {users} from "../mockData.js"
 
 
 export const userRegister = (req, res) => {
