@@ -1,10 +1,15 @@
 import {Router} from 'express'
-import { createUserController, delateUserController } from './controllers/userController.js'
+import { 
+    getUserByIdController,
+    createUserController,
+    deleteUserController,
+     } from './controllers/userController.js'
+
 
 const router = Router()
 
+router.get('/:id', getUserByIdController)
 router.post('/', createUserController)
-router.delete('/:id', delateUserController)
-
+router.delete('/:id', deleteUserController)
 
 export default router

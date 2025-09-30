@@ -2,8 +2,8 @@ import {pool} from '../database/connectDatabase.js'
 import { logger } from '../logger.js'
 
 export const checkUser = async (username, email) => {
-  const ifUserExists = `SELECT * FROM USERS WHERE username = $1 OR email = $2`
-  const checkResult = await pool.query(ifUserExists,[username, email])
+  const ifUserExistsQuery = `SELECT * FROM USERS WHERE username = $1 OR email = $2`
+  const checkResult = await pool.query(ifUserExistsQuery,[username, email])
   return checkResult.rows
 }
 
@@ -24,13 +24,19 @@ export const deleteUserDB = async (id) => {
   const query = `UPDATE users SET deleted_at = NOW() WHERE id = $1 RETURNING deleted_at; `
   
   const responseQuery = await pool.query(query, [id])
-  logger.info("response query: ")
+  
   return responseQuery
 }
 
 export const updateUser = async () => {
+
     
 }
-export const getUser = async (id) => {
+
+export const getUserByID = async (id) => {
+    const query = `SELECT * from users WHERE id = $1;`
     
+    const responseQuery = await pool.query(query, [id])
+    
+    return responseQuery
 }
