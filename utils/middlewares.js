@@ -18,7 +18,7 @@ export const verifyToken = (req, res, next) => {
     try {
         const decoded = jwt.verify(token, process.env.JSON_WEB_TOKEN)
         req.user = decoded
-        logger.info("decoded",decoded)
+        logger.info("jwt decoded",decoded)
         next()
     } catch (error) {
         res.status(401).json({message:"token inválido"})
