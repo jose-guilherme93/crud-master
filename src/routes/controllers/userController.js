@@ -1,6 +1,6 @@
 
-import { logger } from "../../logger.js"
-import { checkUser, createUserDB, deleteUserDB, getUserByID } from "../../models/userModel.js"
+import { logger } from "../../../logger.js"
+import { checkUser, createUserDB, deleteUserDB, getUserByID, updateUserDB } from "../../models/userModel.js"
 
 export const createUserController = async (req, res) => {
 
@@ -51,10 +51,24 @@ const {id} = req.params
 
 
 export const updateUserByIdController = async (req, res) => {
-
-
-
+    const { id } = req.params
+    const updateUserFromUser = req.body
+    try {
+       
+        const updatedUser = await updateUserDB(id, updateUserFromUser)
+        if (updatedUser.rows.length > 0) {
+            res.status(200).json({ user: updatedUser.rows[0] })
+        } else {
+            res.status(404).json({ message: "NOT FOUND: usuário não encontrado" })
+        }
+    } catch (error) {
+        logger.error("erro ao atualizar usuário: ", error)
+        res.status(500).json({ message: "internal server error", error: error.detail })
+    }
 }
+
+
+
 
 
 export const getUserByIdController = async (req, res) => {
