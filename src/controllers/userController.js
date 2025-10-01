@@ -1,6 +1,21 @@
 
-import { logger } from "../../../logger.js"
-import { checkUser, createUserDB, deleteUserDB, getUserByID, updateUserDB } from "../../models/userModel.js"
+import { logger } from "../../logger.js"
+import { checkUser, createUserDB, deleteUserDB, getAllUsersDB, getUserByID, updateUserDB } from "../models/userModel.js"
+
+
+export const getAllUsers = async (req, res) => { 
+    try {
+        const getUsers = await getAllUsersDB()
+       
+        res.status(200).json({getUsers})
+        
+    } catch(error) {
+        console.log(error)
+    }
+
+}
+
+
 
 export const createUserController = async (req, res) => {
 
@@ -53,9 +68,18 @@ const {id} = req.params
 export const updateUserByIdController = async (req, res) => {
     const { id } = req.params
     const updateUserFromUser = req.body
+    const now = new Date();
+    const timestamp = now.toISOString().slice(0, 19).replace('T', ' ');
+    
+    updateUserFromUser["updated_at"] = timestamp
+
+    console.log("🚀 ~ updateUserByIdController ~ updateUserFromUser:", updateUserFromUser)
+    
+
     try {
        
         const updatedUser = await updateUserDB(id, updateUserFromUser)
+        
         if (updatedUser.rows.length > 0) {
             res.status(200).json({ user: updatedUser.rows[0] })
         } else {

@@ -4,11 +4,12 @@ import {
     createUserController,
     deleteUserController,
     updateUserByIdController,
-     } from './controllers/userController.js'
+    getAllUsers,
+     } from '../controllers/userController.js'
 
 
 const router = Router()
-
+router.get('/', getAllUsers)
 router.get('/:id', getUserByIdController)
 router.post('/', createUserController)
 router.delete('/:id', deleteUserController)

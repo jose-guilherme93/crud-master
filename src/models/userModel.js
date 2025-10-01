@@ -1,4 +1,4 @@
-import {pool} from '../database/connectDatabase.js'
+import {pool} from '../../utils/connectDatabase.js'
 
 
 export const checkUser = async (username, email) => {
@@ -28,7 +28,7 @@ export const deleteUserDB = async (id) => {
   return responseQuery
 }
 
-export const updateUserDB = async (id, userData) => {
+export const updateUserDB = async (id, userData ) => {
 
   const keys = Object.keys(userData)
   const values = Object.values(userData)
@@ -37,9 +37,9 @@ export const updateUserDB = async (id, userData) => {
     .map((key, index) => `${key} = $${index + 1}`)
     .join(', ');
 
-  const query = `UPDATE users SET ${setString} WHERE id = $${keys.length + 1} RETURNING *;
+  const query = `UPDATE users SET ${setString} WHERE id = $${keys.length + 1}  RETURNING *;
   `
-  const params = [...values, id]
+  const params = [...values, id, ]
 
   const responseQuery = await pool.query(query, params)
   return responseQuery
@@ -52,4 +52,11 @@ export const getUserByID = async (id) => {
     const responseQuery = await pool.query(query, [id])
     
     return responseQuery
+}
+
+export const getAllUsersDB = async () => {
+  const query = `SELECT * FROM users ORDER BY id ASC LIMIT 50 OFFSET 0;`
+  const responseQuery = pool.query(query)
+  
+  return responseQuery
 }
