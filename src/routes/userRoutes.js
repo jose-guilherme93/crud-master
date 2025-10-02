@@ -14,4 +14,5 @@ router.get('/:id', getUserByIdController)
 router.post('/', createUserController)
 router.delete('/:id', deleteUserController)
 router.put('/:id', updateUserByIdController)
+
 export default router
