@@ -13,7 +13,7 @@ const PORT = 3000
 
 app.use(express.json())
 
-app.use("users", userRoutes)
+app.use("/users", userRoutes)
 app.use("/games", gameRoutes)
 
 // app.route("/login")

@@ -1,5 +1,5 @@
 
-import { pool } from '../connectDatabase.js'
+import { pool } from '../../../utils/connectDatabase.js'
 import dotenv from 'dotenv'
 import { logger } from '../../../logger.js'
 dotenv.config()
@@ -37,11 +37,16 @@ const createUserTable = async () => {
 const enumStatusQuery = `CREATE TYPE game_status AS ENUM ('Jogando','Zerado','Quero jogar','Abandonado')`
 
 const gameCreateQuery = `CREATE TABLE IF NOT EXISTS "games"(
-    id VARCHAR(255) PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     title VARCHAR(255),
     rating DECIMAL(3,1) CHECK (rating >= 0 AND rating <= 10),
     status game_status,
     review VARCHAR(5000),
+    plataform VARCHAR(100),
+    first_release_date TIMESTAMP,
+    storyline VARCHAR(5000),
+    cover_url VARCHAR(500),
+    slug VARCHAR(255),
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
     deleted_at TIMESTAMP NULL
@@ -55,6 +60,7 @@ export const createType = async () => {
 
         const responseEnumStatusQuery = await pool.query(checkTypeStatus)
         if (responseEnumStatusQuery.rows.length > 0) {
+
             logger.info("tipagem existente no banco, ignorando condição")
 
         } else {
@@ -84,13 +90,15 @@ const responseTableCheck = await pool.query(checkTableGames);
         logger.info("Tabela 'games' já existe. Pulando criação.");
 } else {
    const responseGameCreateQuery = await pool.query(gameCreateQuery)
-        console.log(responseGameCreateQuery)
-        logger.info(JSON.stringify(responseGameCreateQuery.rows, null, 2))
+        console.log(responseGameCreateQuery.rows[0])
+        logger.info(responseGameCreateQuery.rows)
 }
     }
  catch (error) {
     logger.error(error)
 }}
+
+createGamesTable()
 
 
 

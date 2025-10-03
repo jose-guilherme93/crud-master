@@ -38,14 +38,37 @@ export const getAllGamesDB = async (filters) => {
         } 
     } catch(error) {
         logger.error("error at get all games at db: ", error)
+        throw error
     }
 }
 
-export const createGame = async () => {
-    try {
+export const createGame = async (bodyParams) => {
+    const  {
+        title,
+        rating,
+        status,
+        review,
+        plataform,
+        first_release_date,
+        storyline,
+        cover_url,
+         slug
+     } = bodyParams
+    
+    const query = `INSERT INTO "games" (title, rating, status, review, plataform, first_release_date, storyline, cover_url, slug) 
+  VALUES ($1,$2, $3, $4, $5, $6,$7,$8,$9) 
+  RETURNING *;
+`
 
+     const values = [
+        title, rating, status, review, plataform, first_release_date, storyline, cover_url, slug
+     ]
+    try {
+        const responseQuery = await pool.query(query, values)
+        return responseQuery.rows[0]
     } catch(error) {
         logger.error("error at createGame: ", error)
+        throw error
     }
 }
 
