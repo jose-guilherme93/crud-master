@@ -1,11 +1,11 @@
 import dotenv from 'dotenv';
 import { Client } from 'pg';
-import { logger } from '../logger';
+import {logger} from '../../../logger.js'
 
 dotenv.config();
 
 const client = new Client({
-  user: process.env.PGUSER,
+  user: process.env.POSTGRES_USER,
   password: process.env.PGPASSWORD,
   host: process.env.PGHOST,
   port: process.env.PGPORT,

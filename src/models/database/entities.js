@@ -30,7 +30,7 @@ const createUserTable = async () => {
 } 
 
 
-
+createUserTable()
 
 // game table
 
@@ -51,7 +51,6 @@ const gameCreateQuery = `CREATE TABLE IF NOT EXISTS "games"(
     updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
     deleted_at TIMESTAMP NULL
     );
-
 `
 const checkTypeStatus = `SELECT * FROM pg_type WHERE typname = 'game_status';`
 
