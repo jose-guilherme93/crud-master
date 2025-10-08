@@ -7,7 +7,7 @@ dotenv.config({ path: path.resolve(process.cwd(), '.env') });
 import { logger } from '../logger.js'
 import userRoutes from './routes/userRoutes.js'
 import gameRoutes from './routes/gameRoutes.js'
-
+import reviewsRoutes from './routes/reviewsRoutes.js'
 const app = express()
 const PORT = 3000
 
@@ -15,7 +15,7 @@ app.use(express.json())
 
 app.use("/users", userRoutes)
 app.use("/games", gameRoutes)
-
+app.use("reviews", reviewsRoutes)
 // app.route("/login")
 //     .post(userLogin)
 
