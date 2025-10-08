@@ -3,5 +3,5 @@ import { getReviewByIdController,createReviewController } from '../controllers/r
 const router = Router()
 
 router.get("/", getReviewByIdController)
-router.put("", createReviewController)
+router.put("/", createReviewController)
 export default router

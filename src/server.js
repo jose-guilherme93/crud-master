@@ -15,7 +15,7 @@ app.use(express.json())
 
 app.use("/users", userRoutes)
 app.use("/games", gameRoutes)
-app.use("reviews", reviewsRoutes)
+app.use("/reviews", reviewsRoutes)
 // app.route("/login")
 //     .post(userLogin)
 
