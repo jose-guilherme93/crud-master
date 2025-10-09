@@ -4,28 +4,6 @@ import { logger } from '../logger.js'
 
 dotenv.config()
 
-
-export const verifyToken = (req, res, next) => {
-    const authHeader = req.headers.authorization
-
-    if(!authHeader || !authHeader.startsWith("Bearer ")) {
-
-        return res.status(401).json({message:"token não fornecido ou inválido"})
-    }
-
-    const token = authHeader.split(" ")[1]
-
-    try {
-        const decoded = jwt.verify(token, process.env.JSON_WEB_TOKEN)
-        req.user = decoded
-        logger.info("jwt decoded",decoded)
-        next()
-    } catch (error) {
-        res.status(401).json({message:"token inválido"})
-    }
-    
-}
-
 export const validateIdParam = (req, res, next) => {
     const {id} = req.params
     if(!id || id.trim() === '') {
@@ -50,6 +28,22 @@ export const validateBodyFields = (requiredFields = []) => {
       })
     }
 
-    next();
-  };
-};
+    next()
+  }
+}
+
+
+
+
+export const authMiddleware = (req, res, next) => {
+  const authHeader = req.headers["authorization"]
+  const token = authHeader && authHeader.split(" ")[1]
+  if (!token) return res.status(401).json({ message: "Token não fornecido" })
+
+  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+    if (err) return res.status(403).json({ message: "Token inválido" })
+    req.user = user
+    next()
+  });
+}
+
