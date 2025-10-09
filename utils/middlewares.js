@@ -25,3 +25,13 @@ export const verifyToken = (req, res, next) => {
     }
     
 }
+
+export const validateIdParam = (req, res, next) => {
+    const {id} = req.params
+    if(!id || id.trim() === '') {
+
+        return res.status(400).json({message: "é necessáirio fornecer um id válido"})
+    }
+
+    next()
+}
