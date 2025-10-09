@@ -1,80 +1,71 @@
-# crud-master
-the best crud in the world
+# Documentação do Projeto `crud-master`
 
-1. 🔧 Configuração Inicial
+Este é um projeto **Node.js/Express.js** estruturado como uma **API REST** robusta. Ele utiliza um design **MVC simplificado**, com foco em separação de responsabilidades entre controladores, modelos e rotas.
 
-        [x] Criar estrutura base com Express
+---
 
-        [x] Configurar dotenv para variáveis de ambiente
+## ⚙️ Tecnologias e Dependências
 
-        [x] Conectar ao Postgree
+O projeto é construído sobre as seguintes tecnologias principais:
 
-        [] Criar estrutura de pastas 
-                
-        [x] routes 
-        [ ] models
-        [ ] controllers
-        [x] middleware
+* **Node.js**: Ambiente de execução assíncrono (utiliza **ES Modules - ESM**).
+* **Express.js**: Framework minimalista para criação de API REST.
+* **PostgreSQL (`pg`)**: Driver oficial para conexão com o banco de dados relacional.
+* **PNPM**: Gerenciador de pacotes eficiente, garantindo a integridade e *caching* de dependências.
+* **Vite/Vitest**: Ambiente de **teste unitário** rápido e moderno.
+* **Winston**: Biblioteca de *logging* para gerenciamento estruturado de logs de aplicação.
+* **JWT (`jsonwebtoken`)**: Implementação de autenticação baseada em tokens.
+* **Dotenv**: Gerenciamento seguro de **variáveis de ambiente**.
 
-2. 🔐 Autenticação de Usuário
+---
 
-        [x] Criar modelo User com username, email, passwordHash
+## 📂 Estrutura de Arquivos
 
-        [ ] autenticação com google opcional
-        
-        [x] Implementar rotas:
+A organização do projeto segue uma arquitetura modular clara, facilitando a navegação e a manutenção:
 
-        [x] POST /register
+* **`src/`**: Contém todo o código-fonte da aplicação.
+    * **`controllers/`**: Lógica de negócio e manipulação das requisições (a camada de serviço).
+    * **`migrations/`**: Scripts SQL ou JS/TS para versionamento e gerenciamento do esquema do banco de dados.
+    * **`models/`**: Representação dos dados e interação direta com o banco de dados (a camada de dados).
+    * **`routes/`**: Definição dos endpoints da API e mapeamento para os *controllers*.
+    * **`utils/`**: Funções utilitárias e *middlewares* compartilhados (`connectDatabase.js`, `middlewares.js`).
+* **`package.json`**: Metadados do projeto. O campo `"type": "module"` indica o uso obrigatório de **sintaxe ESM (`import/export`)**.
+* **`.env`**: **Variáveis de ambiente sensíveis**. **Este arquivo deve ser sempre ignorado pelo Git.**
+* **`pnpm-lock.yaml`**: Garante a **reprodutibilidade exata** das dependências entre ambientes.
 
-        [x] POST /login
+---
 
-        [x] Gerar JWT
-        [x] validar JWT
+## 🚀 Como Rodar o Projeto
 
-        [x] Criar middleware verifyToken para proteger rotas privadas
+Siga os passos abaixo para configurar e iniciar o projeto no seu ambiente de desenvolvimento.
 
-3. 📝 Postagens de Jogos
-        [] Criar modelo Post com:
+### 1. Configuração do Ambiente
 
-        userId, gameId, gameTitle, description, rating, liked, createdAt
+1.  Certifique-se de ter o **Node.js** (versão 18+ é ideal para ESM) e o **PNPM** instalados.
+2.  Crie um arquivo **`.env`** na raiz do projeto com as seguintes variáveis de configuração do PostgreSQL e da chave de segurança:
 
-        [] Rotas protegidas:
+    ```env
+        PGHOST=localhost
+        POSTGRES_DB=cruddb
+        POSTGRES_USER=postgres
+        PGPASSWORD=crudpass
+        DATABASE_URL=postgresql://postgres:crudpass@localhost/cruddb
+    ```
+3. ## 🐳 Docker e Gerenciamento de Containers
 
-        [] POST /posts → criar avaliação
+O projeto utiliza **Docker Compose** para orquestrar o ambiente de banco de dados (`PostgreSQL`) e sua interface de gerenciamento (`pgAdmin`), garantindo que todos os desenvolvedores usem a mesma infraestrutura de dados.
 
-        [] GET /posts → listar avaliações do usuário
+### 1. Inicialização dos Containers
 
-        [] DELETE /posts/:id → remover avaliação
+Para iniciar o banco de dados e o pgAdmin, execute o comando abaixo na raiz do projeto (onde está o `docker-compose.yml`):
 
-4. 🎮 Integração com API de Jogos
-        [] Criar serviço para consumir a API RAWG.io
+```bash
+docker compose up -d
+```
 
-        [] Implementar rota:
+### 2. Instalação de Dependências
 
-        [] GET /games?search=nome → retorna lista de jogos
+Execute o comando de instalação de pacotes PNPM para baixar todas as dependências do `package.json` e garantir o *lock* exato via `pnpm-lock.yaml`:
 
-        [] Salvar gameId e gameTitle na postagem
-
-5. 👤 Perfil do Usuário
-        [] Rota protegida:
-
-        [ ] GET /me → retorna dados do usuário + suas postagens
-
-        [ ] Exibir descrições e notas que ele deu aos jogos
-
-6. 🧪 Testes e Validações
-        [] Validar inputs com Joi ou express-validator
-
-        [] Testar rotas com Postman ou Insomnia
-
-        [] Criar mensagens de erro claras
-
-7. 🚀 Deploy
-        [] Criar arquivo Procfile para Heroku (ou usar Render/Vercel)
-
-        [] Configurar variáveis de ambiente no servidor
-
-        [] Testar endpoints em produção
-
-📚 Documentação da API
-Será adicionada após finalização das rotas principais.
+```bash
+pnpm install
