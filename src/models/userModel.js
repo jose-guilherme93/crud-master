@@ -22,9 +22,8 @@ export const createUserDB = async (id, username, email, password, avatar ) => {
 
 export const deleteUserDB = async (id) => {
   const query = `UPDATE users SET deleted_at = NOW() WHERE id = $1 RETURNING deleted_at; `
-  
   const responseQuery = await pool.query(query, [id])
-  
+
   return responseQuery
 }
 
@@ -32,31 +31,29 @@ export const updateUserDB = async (id, userData ) => {
 
   const keys = Object.keys(userData)
   const values = Object.values(userData)
-
   const setString = keys
     .map((key, index) => `${key} = $${index + 1}`)
     .join(', ');
-
+    
   const query = `UPDATE users SET ${setString} WHERE id = $${keys.length + 1}  RETURNING *;
   `
   const params = [...values, id, ]
-
   const responseQuery = await pool.query(query, params)
+
   return responseQuery
 }
 
 
 export const getUserByID = async (id) => {
     const query = `SELECT * from users WHERE id = $1;`
-    
     const responseQuery = await pool.query(query, [id])
-    
+
     return responseQuery
 }
 
 export const getAllUsersDB = async () => {
   const query = `SELECT * FROM users ORDER BY id ASC LIMIT 50 OFFSET 0;`
   const responseQuery = pool.query(query)
-  
+
   return responseQuery
 }

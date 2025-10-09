@@ -5,13 +5,11 @@ import {pool} from '../../utils/connectDatabase.js'
 
 export const getGameById = async (id) => {
     const query = `SELECT * FROM games WHERE id = $1`
-    try {
+    
         const getGames = await pool.query(query, [id])
         
         return getGames
-    } catch(error) {
-        logger.error("error at createGame: ", error)
-    }
+   
 }
 
 export const getAllGamesDB = async (filters) => {
@@ -27,7 +25,7 @@ export const getAllGamesDB = async (filters) => {
         limit,
         offset
     ]
-    try {
+   
         const responseQuery = await pool.query(query, params)
 
         return {
@@ -36,11 +34,8 @@ export const getAllGamesDB = async (filters) => {
                 currentPage: page
             }
         } 
-    } catch(error) {
-        logger.error("error at get all games at db: ", error)
-        throw error
-    }
-}
+    } 
+   
 
 export const createGame = async (bodyParams) => {
     const  {
@@ -63,27 +58,32 @@ export const createGame = async (bodyParams) => {
      const values = [
         title, rating, status, review, plataform, first_release_date, storyline, cover_url, slug
      ]
-    try {
+    
         const responseQuery = await pool.query(query, values)
         return responseQuery.rows[0]
-    } catch(error) {
-        logger.error("error at createGame: ", error)
-        throw error
+} 
+      
+
+export const updateGameDB = async (id, updateGameData) => {
+
+    const keys = Object.keys(updateGameData)
+    const values = Object.values(updateGameData)
+
+    
+      
+    const setValues = keys
+    .map((key, index) => {
+
+        return `${key} = $${index + 1}`
+       
+
     }
-}
+)
 
-export const deleteGame = async () => {
-    try {
+    const query = `UPDATE games SET ${setValues} WHERE id = $${values.length + 1} RETURNING *`       
+    const params = [...values, id]
 
-    } catch(error) {
-        logger.error("error at deleteGame: ", error)
-    }
-}
+    const responseQuery = await pool.query(query, params)
 
-export const updateGame = async () => {
-    try {
-
-    } catch(error) {
-        logger.error("error at createGame: ", error)
-    }
+    return responseQuery
 }
