@@ -35,3 +35,21 @@ export const validateIdParam = (req, res, next) => {
 
     next()
 }
+
+
+export const validateBodyFields = (requiredFields = []) => {
+  return (req, res, next) => {
+    const missingFields = requiredFields.filter(field => {
+      const value = req.body[field]
+      return value === undefined || value === null || value === ''
+    })
+
+    if (Object.keys(req.body).length <= 0 || missingFields.length > 0) {
+      return res.status(400).json({
+        message: `Campos obrigatórios ausentes para criar PUT: ${missingFields.join(', ')}`
+      })
+    }
+
+    next();
+  };
+};

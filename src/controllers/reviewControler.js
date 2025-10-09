@@ -10,8 +10,6 @@ export const createReviewController = async(req, res) => {
         score: req.body.score,
         game_id: req.body.game_id,
         user_id: req.body.user_id
-
-
      }
     try {
     
@@ -30,6 +28,14 @@ export const createReviewController = async(req, res) => {
     res.status(201).json(newReview)
   } catch (err) {
     console.error("Erro ao criar review:", err);
-    res.status(500).json({ error: "Erro ao criar review" })
+    res.status(500).json({ error: "Erro ao criar review", message: err.detail  })
   }
+}
+
+export const deleteReviewController = async () => {
+
+}
+
+export const updateReviewController = async () => {
+  
 }
