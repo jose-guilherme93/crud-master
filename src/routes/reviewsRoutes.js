@@ -1,6 +1,9 @@
 import { Router } from "express";
 import {validateBodyFields} from '../../utils/middlewares.js'
-import { getReviewByIdController,createReviewController, deleteReviewController, updateReviewController } from '../controllers/reviewControler.js'
+import { getReviewByIdController, 
+  createReviewController,
+  deleteReviewController,
+  updateReviewController } from '../controllers/reviewControler.js'
 const router = Router()
 
 router.get("/", getReviewByIdController)
