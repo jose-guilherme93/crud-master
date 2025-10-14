@@ -6,6 +6,7 @@ import * as crypto from 'node:crypto'
 import { verifyToken } from '../../utils/verifyToken.js'
 import { searchUserByEmail,
   searchEmailRegistered, insertTokenInDB } from "../models/authModel.js"
+import { pool } from "../../utils/connectDatabase.js"
 
 dotenv.config()
 
@@ -21,7 +22,7 @@ export const loginController = async (req, res) => {
     }
 
     if (password_hash !== responseDBSearch.password_hash) {
-      return res.status(401).json({ message: "Senha inválida" })
+      return res.status(401).json({ message: "Senha ou email inválido" })
     }
 
     const token = jwt.sign(
@@ -73,7 +74,7 @@ const sendEmail = async () => {
     subject: "Redefinição de senha de usuário",
     text: "", 
     html: `<p> Para redefinir sua senha, clique no link abaixo <p/>
-    <a href="http://localhost:3000/auth/reset-password/?code=${recoveryToken}">
+    <a href="http://localhost:3000/auth/reset-password/?recoveryToken=${recoveryToken}">
             Redefinir Senha
           </a>`
    
@@ -82,7 +83,7 @@ const sendEmail = async () => {
   console.log("Message sent:", info.messageId)
 }
 
-//sendEmail().catch(console.error)
+sendEmail().catch(console.error)
 
 
   res.status(200).json({
@@ -93,37 +94,36 @@ const sendEmail = async () => {
   }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 export const forgotPasswordController = (req, res) => {
   res.json({ message: "Em construção" })
 }
 
-export const resetPasswordController = (req, res) => {
-  const { code } = req.query
+export const resetPasswordController = async (req, res) => {
+  const { recoveryToken } = req.query
 
-   if(!code) {
-    return res.status(400).json({ message: "Token de recuperação é obrigatório" })
-   }
 
-   const token = verifyToken(code)
+  const {newPasswordHash} = req.body
 
-  res.json({ message:token })
+  if(!recoveryToken) {
+   return res.status(400).json({ message: "Token de recuperação é obrigatório" })
+  }
+
+  try {
+    const responseDb = await pool.query(`SELECT * FROM recovery WHERE code = $1`, [recoveryToken])
+    
+
+    if(responseDb.rows.length == 0 || responseDb.rowCount === 0) {
+      return res.status(401).json({message: "código de verificação inválido"})
+
+  } else {
+    const responseDbRecoveryPassword = await pool.query(`UPDATE users SET password_hash = $1 WHERE id = $2 RETURNING *`,[newPasswordHash, responseDb.rows[0].user_id])
+    return res.status(200).json({message: responseDbRecoveryPassword.rows[0]})
+  }
+    
+  } catch(error) {
+    console.error(error)
+  }
+
+   res.status(500).json({error: "error"})
 }
 

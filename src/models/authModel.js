@@ -18,7 +18,7 @@ export const searchEmailRegistered = async (email, recoveryToken) => {
 
 export const insertTokenInDB = async (fields, recoveryToken) => {
   try {
-    const { id } = fields
+    const userId = fields.id
     const idRecovery = generateBigIntId()
 
     const query = `
@@ -37,10 +37,10 @@ export const insertTokenInDB = async (fields, recoveryToken) => {
 
     const expiresAt = new Date(Date.now() + 60 * 60 * 1000)
 
-    const values = [idRecovery, id, recoveryToken, expiresAt]
+    const values = [idRecovery, userId, recoveryToken, expiresAt]
 
     const responseQuery = await pool.query(query, values)
-    console.log("🚀 ~ insertTokenInDB ~ responseQuery:", responseQuery.rows[0])
+    
 
     return responseQuery.rows[0]
   } catch (error) {

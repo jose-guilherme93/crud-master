@@ -3,13 +3,11 @@
 
 CREATE TABLE recovery (
     id BIGINT PRIMARY KEY,
-    user_id VARCHAR(80) UNIQUE,
+    user_id UUID NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id),
     code VARCHAR NULL DEFAULT NULL,
     expires_at TIMESTAMPTZ NULL DEFAULT NULL,
     attempts INT NULL,
     created_at TIMESTAMPTZ NOT NULL,
     updated_at TIMESTAMPTZ NOT NULL
 );
-
--- Criando índice adicional no campo userId
-CREATE INDEX idx_recovery_userId ON recovery(user_id);

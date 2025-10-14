@@ -7,21 +7,21 @@ export const checkUser = async (username, email) => {
   return checkResult.rows
 }
 
-export const createUserDB = async (id, username, email, password, avatar ) => {
+export const createUserDB = async (id, username, email, password_hash, avatar ) => {
 
   id = crypto.randomUUID()
 
-  const query = `INSERT INTO users (id, username, email, password, avatar)
+  const query = `INSERT INTO users (id, username, email, password_hash, avatar)
     VALUES ($1, $2, $3, $4, $5)
     RETURNING *;
     `
-    const result = await pool.query(query, [id, username, email, password, avatar])
+    const result = await pool.query(query, [id, username, email, password_hash, avatar])
     return result.rows[0]
 }
 
 
 export const deleteUserDB = async (id) => {
-  const query = `UPDATE users SET deleted_at = NOW() WHERE id = $1 RETURNING deleted_at; `
+  const query = `UPDATE users SET deleted_at = NOW() WHERE id = $1 RETURNING deleted_at;`
   const responseQuery = await pool.query(query, [id])
 
   return responseQuery

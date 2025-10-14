@@ -16,10 +16,9 @@ export const getAllUsers = async (req, res) => {
 }
 
 
-
 export const createUserController = async (req, res) => {
 
-    const {username, email, password, avatar} = req.body
+    const {username, email, password_hash, avatar} = req.body
     const check = await checkUser(username, email)
 
     if(check.length) {return res.send("usuário já cadastrado")}
@@ -29,7 +28,7 @@ export const createUserController = async (req, res) => {
         try {
             const id = crypto.randomUUID()
             
-            const user = await createUserDB(id, username, email, password, avatar)
+            const user = await createUserDB(id, username, email, password_hash, avatar)
             console.log(user)
             res.status(201).json(user)
         }

@@ -12,6 +12,6 @@ router.post("/login", loginController)
 router.post("/recovery", authMiddleware, recoveryController)
 
 
-router.post("/forgot-password/:token", authMiddleware, forgotPasswordController)
-router.post("/reset-password/", authMiddleware, resetPasswordController)
+router.post("/forgot-password/:token", forgotPasswordController)
+router.post("/reset-password/", resetPasswordController)
 export default router
