@@ -1,28 +1,28 @@
 import jwt from "jsonwebtoken"
-import nodemailer from "nodemailer"
+import {createTransport} from "nodemailer"
 
 import dotenv from "dotenv";
 import * as crypto from 'node:crypto'
-import { verifyToken } from '../../utils/verifyToken.js'
+
 import { searchUserByEmail,
   searchEmailRegistered, insertTokenInDB } from "../models/authModel.js"
 import { pool } from "../../utils/connectDatabase.js"
+import { logger } from '../../logger.js'
 
 dotenv.config()
 
 
 export const loginController = async (req, res) => {
+  const { email, password_hash } = req.body
+  logger.info(`try to login with ${email} email`)
+
   try {
-    const { email, password_hash } = req.body
 
     const responseDBSearch = await searchUserByEmail(email)
    
-    if (!responseDBSearch || responseDBSearch === 0) {
-      return res.status(404).json({ message: "Usuário não cadastrado" })
-    }
-
-    if (password_hash !== responseDBSearch.password_hash) {
-      return res.status(401).json({ message: "Senha ou email inválido" })
+    if (!responseDBSearch || responseDBSearch === 0 || password_hash !== responseDBSearch.password_hash) {
+      logger.warn("invalid email or password")
+      return res.status(404).json({ message: "invalid email or password" })
     }
 
     const token = jwt.sign(
@@ -30,13 +30,13 @@ export const loginController = async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: "1Y" }
     );
-
+    logger.info(`login sucess with: ${email}`)
     return res.json({
       message: "Login realizado com sucesso",
       token
     });
   } catch (error) {
-    console.error(error)
+    logger.error(error)
     return res.status(500).json({ message: "Erro interno no servidor" })
   }
 }
@@ -45,11 +45,12 @@ export const loginController = async (req, res) => {
 
 export const recoveryController = async (req, res) => {
   const { email }  = req.body
-  
+  logger.info(`try to recovery password with: ${email}`)
   const recoveryToken = crypto.randomBytes(32).toString('hex')
   const responseDbSearch = await searchEmailRegistered(email)
   
   if(!responseDbSearch.rowCount || responseDbSearch.length === 0) {
+    logger.warn("email not found")
     return res.status(404).json({message: "Email não cadastrado"})
   } else {
 
@@ -58,7 +59,7 @@ export const recoveryController = async (req, res) => {
   
     
  
-  const transporter = nodemailer.createTransport({
+  const transporter = createTransport({
     host: "sandbox.smtp.mailtrap.io",
     port: 2525,
     auth: {

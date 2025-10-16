@@ -1,30 +1,27 @@
-
 import { createLogger, format, transports } from 'winston';
 
 const { combine, timestamp, printf, colorize } = format;
 
-// Define o formato customizado do log
-const customFormat = printf(({ level, message, timestamp }) => {
-  return `${timestamp} [${level}]: ${message}`;
+const customFormat = printf(info => {
+  const icons = {
+    info: 'ℹ️',
+    warn: '⚠️',
+    error: '❌',
+    debug: '🐛'
+  };
+  return `${info.timestamp} ${icons[info.level] || ''} [${info.level.toUpperCase()}]: ${info.message}`;
 });
 
-
-const logger = createLogger({
+export const logger = createLogger({
   level: 'info',
   format: combine(
-    colorize(),         
-    timestamp(),        
-    customFormat        
+    timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }), // primeiro timestamp
+    customFormat,                                 // depois o formato
+    colorize({ all: true })                       // por último a cor
   ),
   transports: [
     new transports.Console(),
-    new transports.File({ filename: 'app.log' }) 
+    new transports.File({ filename: 'app.log' })
   ]
 });
 
-// Função utilitária para logar mensagens de nível 'info'
-function info(message) {
-  logger.info(message);
-}
-
-export { logger, info };

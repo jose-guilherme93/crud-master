@@ -7,9 +7,16 @@ export const checkUser = async (username, email) => {
   return checkResult.rows
 }
 
-export const createUserDB = async (id, username, email, password_hash, avatar ) => {
+export const createUserDB = async (newUser) => {
 
-  id = crypto.randomUUID()
+  const {
+    id,
+    username,
+    email,
+    password_hash,
+    avatar
+
+  } = newUser
 
   const query = `INSERT INTO users (id, username, email, password_hash, avatar)
     VALUES ($1, $2, $3, $4, $5)

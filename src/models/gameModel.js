@@ -50,7 +50,15 @@ export const createGame = async (bodyParams) => {
          slug
      } = bodyParams
     
-    const query = `INSERT INTO "games" (title, rating, status, review, plataform, first_release_date, storyline, cover_url, slug) 
+    const query = `INSERT INTO "games" (title,
+         rating,
+          status,
+           review,
+            plataform,
+            first_release_date,
+            storyline,
+            cover_url,
+            slug) 
   VALUES ($1,$2, $3, $4, $5, $6,$7,$8,$9) 
   RETURNING *;
 `
@@ -69,14 +77,9 @@ export const updateGameDB = async (id, updateGameData) => {
     const keys = Object.keys(updateGameData)
     const values = Object.values(updateGameData)
 
-    
-      
     const setValues = keys
     .map((key, index) => {
-
         return `${key} = $${index + 1}`
-       
-
     }
 )
 
