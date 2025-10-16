@@ -1,4 +1,4 @@
-# Documentação do Projeto `crud-master`
+# Documentação do Projeto `Gamecatalog`
 
 Este é um projeto **Node.js/Express.js** estruturado como uma **API REST** robusta. Ele utiliza um design **MVC simplificado**, com foco em separação de responsabilidades entre controladores, modelos e rotas.
 
