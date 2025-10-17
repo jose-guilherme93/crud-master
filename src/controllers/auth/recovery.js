@@ -1,14 +1,17 @@
 import { logger } from "../../../logger.js"
 import * as crypto from 'node:crypto'
 import {createTransport} from "nodemailer"
-
+import * as z from 'zod'
 import { searchEmailRegistered } from "../../models/authModel.js"
+import { insertTokenInDB } from "../../models/authModel.js"
 
-
-
+const emailSchema = z.object({
+  email: z.email().min(4).max(100)
+})
 
 export const recoveryController = async (req, res) => {
   const { email }  = req.body
+  emailSchema.parse({email})
   logger.info(`try to recovery password with: ${email}`)
   const recoveryToken = crypto.randomBytes(32).toString('hex')
   const responseDbSearch = await searchEmailRegistered(email)
@@ -25,7 +28,7 @@ export const recoveryController = async (req, res) => {
     host: "sandbox.smtp.mailtrap.io",
     port: 2525,
     auth: {
-      user: process.env.USER_MAILER,
+      user: process.env.USERNAME_MAILER,
       pass: process.env.USER_PASSWORD_TRANSPORTER_MAILER
     }
   })

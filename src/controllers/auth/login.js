@@ -1,13 +1,20 @@
-import { logger } from "../../../logger.js"
 import jwt from "jsonwebtoken"
+import * as z from 'zod'
+import { logger } from "../../../logger.js"
+
+
 import {searchUserByEmail} from '../../models/authModel.js'
 
 
-
+const emailSchema = z.object({
+  email: z.email().min(4).max(100),
+  password_hash: z.string().min(6).max(255)
+})
 
 
 export const loginController = async (req, res) => {
   const { email, password_hash } = req.body
+  emailSchema.parse({email, password_hash})
   logger.info(`try to login with ${email} email`)
 
   try {

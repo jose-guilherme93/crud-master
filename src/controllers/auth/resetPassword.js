@@ -1,11 +1,15 @@
 import { logger } from "../../../logger.js"
 import { pool } from "../../../utils/connectDatabase.js"
+import * as z from 'zod'
 
 
+const tokenSchema = z.object({
+  recoveryToken: z.string().length(64).regex(/^[a-f0-9]{64}$/i)
 
-
+})
 export const resetPasswordController = async (req, res) => {
   const { recoveryToken } = req.query
+  tokenSchema.parse({recoveryToken})
   if(!recoveryToken) {
     logger.warn("token not found in req.query")
     res.status(400).json({ message: "Token de recuperação é obrigatório" })
