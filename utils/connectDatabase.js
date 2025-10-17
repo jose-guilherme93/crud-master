@@ -1,5 +1,4 @@
-import { config } from "dotenv"
-config({quiet:true})
+
 import { Pool } from "pg"
 import { logger } from "../logger.js"
 

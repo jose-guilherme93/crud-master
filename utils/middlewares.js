@@ -1,8 +1,7 @@
-import dotenv from 'dotenv'
-import jwt from 'jsonwebtoken'
-import { logger } from '../logger.js'
 
-dotenv.config()
+import jwt from 'jsonwebtoken'
+
+
 
 export const validateIdParam = (req, res, next) => {
     const {id} = req.params

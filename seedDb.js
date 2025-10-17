@@ -1,8 +1,8 @@
-import { config } from 'dotenv'
+
 import { pool } from './utils/connectDatabase.js'
 import { randomUUID } from 'crypto'
 
-config()
+
 
 const seed = async () => {
   try {
