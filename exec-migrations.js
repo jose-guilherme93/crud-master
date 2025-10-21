@@ -1,12 +1,12 @@
 
-import { Client } from "pg";
+import { Client } from "pg"
 import fs from "node:fs";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
+import path from "node:path"
+import { fileURLToPath } from "node:url"
 
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 
 const client = new Client({
@@ -15,7 +15,7 @@ const client = new Client({
   database: process.env.POSTGRES_DB,
   user: process.env.POSTGRES_USER,
   password: process.env.PGPASSWORD,
-});
+})
 
 async function ensureMigrationsTable() {
   await client.query(`CREATE TABLE IF NOT EXISTS migrations (
@@ -23,53 +23,53 @@ async function ensureMigrationsTable() {
       name VARCHAR(255) NOT NULL,
       run_on TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
-  `);
+  `)
 }
 
 async function getExecutedMigrations() {
-  const res = await client.query("SELECT name FROM migrations");
+  const res = await client.query("SELECT name FROM migrations")
   return res.rows.map((r) => r.name);
 }
 
 async function runMigrations() {
   try {
-    await client.connect();
+    await client.connect()
 
-    await ensureMigrationsTable();
+    await ensureMigrationsTable()
 
-    const migrationsDir = path.join(__dirname, "src", "migrations");
+    const migrationsDir = path.join(__dirname, "src", "migrations")
     const files = fs
       .readdirSync(migrationsDir)
-      .filter((f) => f.endsWith(".sql"));
+      .filter((f) => f.endsWith(".sql"))
 
     const executedMigrations = await getExecutedMigrations();
 
     for (const file of files) {
       if (executedMigrations.includes(file)) {
-        console.log(`Skipping already executed migration: ${file}`);
+        console.log(`Skipping already executed migration: ${file}`)
         continue;
       }
 
-      const filePath = path.join(migrationsDir, file);
-      const sql = fs.readFileSync(filePath, "utf-8");
+      const filePath = path.join(migrationsDir, file)
+      const sql = fs.readFileSync(filePath, "utf-8")
 
       try {
         await client.query(sql);
-        await client.query("INSERT INTO migrations(name) VALUES($1)", [file]);
-        console.log(`Migration executed: ${file}`);
+        await client.query("INSERT INTO migrations(name) VALUES($1)", [file])
+        console.log(`Migration executed: ${file}`)
       } catch (err) {
-        console.error(`Error running migration ${file}:`, err);
-        process.exit(1);
+        console.error(`Error running migration ${file}:`, err)
+        process.exit(1)
       }
     }
 
-    console.log("All migrations executed!");
+    console.log("All migrations executed!")
   } catch (err) {
-    console.error("Erro ao conectar ou executar migrations:", err);
+    console.error("Erro ao conectar ou executar migrations:", err)
   } finally {
-    await client.end();
-    console.log("Conexão encerrada");
+    await client.end()
+    console.log("Conexão encerrada")
   }
 }
 
-runMigrations();
+runMigrations()

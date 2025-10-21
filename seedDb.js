@@ -16,8 +16,8 @@ const seed = async () => {
 
     console.log('👤 Inserindo 500 usuários...')
     for (let i = 1; i <= 500; i++) {
-      const id = randomUUID();
-      userIds.push(id);
+      const id = randomUUID()
+      userIds.push(id)
       await pool.query(
         `INSERT INTO users (id, username, email, password_hash, avatar)
          VALUES ($1, $2, $3, $4, $5)`,
@@ -49,10 +49,10 @@ const seed = async () => {
           `jogo-${i}`,
         ]
       );
-      gameIds.push(result.rows[0].id);
+      gameIds.push(result.rows[0].id)
     }
 
-    console.log('📝 Inserindo 500 reviews...');
+    console.log('📝 Inserindo 500 reviews...')
     for (let i = 0; i < 500; i++) {
       await pool.query(
         `INSERT INTO reviews (game_id, user_id, review_text, score)
@@ -66,10 +66,10 @@ const seed = async () => {
       );
     }
 
-    console.log('✅ Seed finalizado com sucesso!');
-    pool.end();
+    console.log('✅ Seed finalizado com sucesso!')
+    pool.end()
   } catch (err) {
-    console.error('❌ Erro ao rodar seed:', err);
+    console.error('❌ Erro ao rodar seed:', err)
     pool.end();
   }
 };

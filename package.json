@@ -1,17 +1,18 @@
 {
-  "name": "crud-master",
+  "name": "gamecatalog",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
     "test": "vitest",
-    "start": "node --env-file .env --watch --watch-path=src src/server.js"
+    "start": "node --env-file=.env --watch-path=src src/server.js",
+     "migrate": "node --env-file=.env exec-migrations.js"
   },
   "keywords": [],
   "type": "module",
   "author": "",
   "license": "ISC",
-  "packageManager": "pnpm@10.18.1",
+  "packageManager": "pnpm@10.18.3",
   "dependencies": {
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",

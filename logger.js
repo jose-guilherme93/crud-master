@@ -1,6 +1,6 @@
-import { createLogger, format, transports } from 'winston';
+import { createLogger, format, transports } from 'winston'
 
-const { combine, timestamp, printf, colorize } = format;
+const { combine, timestamp, printf } = format;
 
 const customFormat = printf(info => {
   const icons = {
@@ -9,15 +9,14 @@ const customFormat = printf(info => {
     error: '❌',
     debug: '🐛'
   };
-  return `${info.timestamp} ${icons[info.level] || ''} [${info.level.toUpperCase()}]: ${info.message}`;
+  return `${info.timestamp} ${icons[info.level] || ''} [${info.level.toUpperCase()}]: ${info.message}`
 });
 
 export const logger = createLogger({
   level: 'info',
   format: combine(
-    timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }), // primeiro timestamp
-    customFormat,                                 // depois o formato
-    colorize({ all: true })                       // por último a cor
+    timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+    customFormat,                                                      
   ),
   transports: [
     new transports.Console(),

@@ -51,14 +51,14 @@ export const createUserController = async (req, res) => {
 export const deleteUserController = async (req, res) => {
 
 const {id} = req.params
-
+    logger.warn(`deleting user with id: ${id}`)
     try {
         const deleteUser = await deleteUserDB(id)
         if(deleteUser.rows.length > 0) {
-            console.log("deleteUser function: ", deleteUser.rows[0])
+            logger.info(`deleted_at at ${deleteUser.rows[0].deleted_at}`)
             res.status(200).json(deleteUser.rows[0])
 
-        } else {res.status(400).json({message:"Bad request"})
+        }   else {res.status(404).json({message: "id not found"})
         
 
     }
