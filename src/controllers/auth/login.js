@@ -1,43 +1,65 @@
-import jwt from "jsonwebtoken"
+
 import * as z from 'zod'
 import { logger } from "../../../logger.js"
+import  jwt  from 'jsonwebtoken'
+
+import {insertTokenSession, searchUserByEmail} from '../../models/authModel.js'
 
 
-import {searchUserByEmail} from '../../models/authModel.js'
-
-
-const emailSchema = z.object({
+const userSchema = z.object({
   email: z.email().min(4).max(100),
   password_hash: z.string().min(6).max(255)
 })
 
 
 export const loginController = async (req, res) => {
+
   const { email, password_hash } = req.body
-  emailSchema.parse({email, password_hash})
+  const ip = req.get['x-forwarded-for'] || req.socket.remoteAddress
+  const browser = req.headers['user-agent'];
+
+  userSchema.parse({email, password_hash})
   logger.info(`try to login with ${email} email`)
 
   try {
 
     const responseDBSearch = await searchUserByEmail(email)
-   
     if (!responseDBSearch || responseDBSearch === 0 || password_hash !== responseDBSearch.password_hash) {
       logger.warn("invalid email or password")
       return res.status(404).json({ message: "invalid email or password" })
     }
 
-    const token = jwt.sign(
-      { id: responseDBSearch.id, email: responseDBSearch.email },
-      process.env.JWT_SECRET,
-      { expiresIn: "1Y" }
-    );
-    logger.info(`login sucess with: ${email}`)
+    const expiresAt = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString();
+
+    const sessionParameters = {
+      sessionId: crypto.randomUUID(),
+      userId: responseDBSearch.id,
+      browser,
+      ip,
+      expiresAt
+      
+    }
+    const sessionToken = jwt.sign({
+      sub: sessionParameters.sessionId,
+      exp: Math.floor(Date.now() / 1000) + 60 * 60
+
+    }, process.env.JWT_SECRET)
+    
+    
+    const token = await insertTokenSession(sessionParameters, sessionToken)
+   
+    logger.info(`token inserted successfully: ${token.created_at}`)
+    logger.info(`login success with: ${email}`)
+
     return res.json({
       message: "Login realizado com sucesso",
-      token
-    });
+    })
+
   } catch (error) {
     logger.error(error)
-    return res.status(500).json({ message: "Erro interno no servidor" })
+    
+    res.status(500).json({ message: "Erro interno no servidor" })
+    throw error
   }
+  
 }

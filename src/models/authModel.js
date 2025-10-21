@@ -49,3 +49,30 @@ export const insertTokenInDB = async (fields, recoveryToken) => {
   }
 };
 
+export const insertTokenSession = async (sessionParameters, sessionToken) => {
+  const {sessionId, userId, browser, ip, expiresAt} = sessionParameters
+  try {
+    const query = `
+      INSERT INTO sessions (
+        id,
+        user_id,
+        session_token,
+        browser,
+        ip,
+        expires_at
+      ) VALUES (
+        $1, $2, $3, $4, $5, $6
+      )
+      RETURNING *;
+    `
+
+    const values = [sessionId, userId, sessionToken, browser, ip, expiresAt];
+
+    const responseQuery = await pool.query(query, values)
+
+    return responseQuery.rows[0]
+  } catch (error) {
+    console.error("❌ Erro ao inserir token de sessão:", error)
+    throw error;
+  }
+}

@@ -17,7 +17,7 @@ export const createReviewController = async(req, res) => {
       SELECT 1 FROM reviews
       WHERE user_id = $1 AND game_id = $2
       LIMIT 1;
-    `;
+    `
     const checkResult = await pool.query(checkQuery, [reqParams.user_id, reqParams.game_id])
 
     if (checkResult.rowCount > 0) {
