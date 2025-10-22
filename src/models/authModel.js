@@ -56,17 +56,16 @@ export const insertTokenSession = async (sessionParameters, sessionToken) => {
       INSERT INTO sessions (
         id,
         user_id,
-        session_token,
         browser,
         ip,
         expires_at
       ) VALUES (
-        $1, $2, $3, $4, $5, $6
+        $1, $2, $3, $4, $5
       )
       RETURNING *;
     `
 
-    const values = [sessionId, userId, sessionToken, browser, ip, expiresAt];
+    const values = [sessionId, userId, browser, ip, expiresAt];
 
     const responseQuery = await pool.query(query, values)
 

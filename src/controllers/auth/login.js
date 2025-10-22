@@ -8,9 +8,8 @@ import {insertTokenSession, searchUserByEmail} from '../../models/authModel.js'
 
 const userSchema = z.object({
   email: z.email().min(4).max(100),
-  password_hash: z.string().min(6).max(255)
+  password_hash: z.string().min(8, "a senha deve conter ao menos 8 caracteres").max(64, "a senha deve conter no máximo 64 caracteres")
 })
-
 
 export const loginController = async (req, res) => {
 
@@ -22,15 +21,13 @@ export const loginController = async (req, res) => {
   logger.info(`try to login with ${email} email`)
 
   try {
-
     const responseDBSearch = await searchUserByEmail(email)
     if (!responseDBSearch || responseDBSearch === 0 || password_hash !== responseDBSearch.password_hash) {
       logger.warn("invalid email or password")
       return res.status(404).json({ message: "invalid email or password" })
     }
 
-    const expiresAt = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString();
-
+    const expiresAt = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString()
     const sessionParameters = {
       sessionId: crypto.randomUUID(),
       userId: responseDBSearch.id,
@@ -46,7 +43,7 @@ export const loginController = async (req, res) => {
     }, process.env.JWT_SECRET)
     
     
-    const token = await insertTokenSession(sessionParameters, sessionToken)
+    const token = await insertTokenSession(sessionParameters)
    
     logger.info(`token inserted successfully: ${token.created_at}`)
     logger.info(`login success with: ${email}`)

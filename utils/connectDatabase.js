@@ -9,10 +9,10 @@ export const pool = new Pool({
 
 // Loga quando a conexão é estabelecida
 pool.on('connect', () => {
-  logger.info('Conexão com o banco de dados estabelecida');
+  logger.info('Database connected');
 });
 
 // Loga erros de conexão
 pool.on('error', (err) => {
-  logger.error(`🔴 Erro na conexão com o banco: ${err.message}`);
+  logger.error(`🔴 error on connect to database: ${err.message}`);
 });
