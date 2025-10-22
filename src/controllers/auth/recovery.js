@@ -3,7 +3,7 @@ import * as crypto from 'node:crypto'
 import {createTransport} from "nodemailer"
 import * as z from 'zod'
 import { searchEmailRegistered } from "../../models/authModel.js"
-import { insertTokenInDB } from "../../models/authModel.js"
+import { insertRecoveryTokenInDB } from "../../models/authModel.js"
 
 const emailSchema = z.object({
   email: z.email().min(4).max(100)
@@ -21,7 +21,7 @@ export const recoveryController = async (req, res) => {
     return res.status(404).json({message: "Email não cadastrado"})
   } else {
 
-    await insertTokenInDB(responseDbSearch.rows[0], recoveryToken)
+    await insertRecoveryTokenInDB(responseDbSearch.rows[0], recoveryToken)
   }
   
   const transporter = createTransport({

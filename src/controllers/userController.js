@@ -1,7 +1,7 @@
 
 import { logger } from "../../logger.js"
 import { checkUser, createUserDB, deleteUserDB, getAllUsersDB, getUserByID, updateUserDB } from "../models/userModel.js"
-
+import * as z from 'zod'
 
 export const getAllUsers = async (req, res) => { 
     try {

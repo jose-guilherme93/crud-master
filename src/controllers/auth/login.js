@@ -3,11 +3,12 @@ import * as z from 'zod'
 import { logger } from "../../../logger.js"
 import  jwt  from 'jsonwebtoken'
 
-import {insertTokenSession, searchUserByEmail} from '../../models/authModel.js'
+import {insertSession, searchUserByEmail} from '../../models/authModel.js'
+import { pool } from '../../../utils/connectDatabase.js'
 
 
 const userSchema = z.object({
-  email: z.email().min(4).max(100),
+  email: z.email("formato de email inválido").min(4).max(100),
   password_hash: z.string().min(8, "a senha deve conter ao menos 8 caracteres").max(64, "a senha deve conter no máximo 64 caracteres")
 })
 
@@ -42,16 +43,32 @@ export const loginController = async (req, res) => {
 
     }, process.env.JWT_SECRET)
     
-    
-    const token = await insertTokenSession(sessionParameters)
-   
-    logger.info(`token inserted successfully: ${token.created_at}`)
+
+    const searchActiveSessions = await pool.query(`SELECT user_id FROM sessions WHERE user_id = $1`, [responseDBSearch.id])
+    const MAX_SESSIONS = 5
+    if(searchActiveSessions.rowCount >= MAX_SESSIONS) {
+      const oldestSessionQuery = `
+      SELECT id FROM sessions
+      WHERE user_id = $1
+      ORDER BY created_at ASC
+      LIMIT 1
+    `;
+    const oldestSessionResult = await pool.query(oldestSessionQuery, [responseDBSearch.id])
+
+    if (oldestSessionResult.rowCount > 0) {
+      const oldestSessionId = oldestSessionResult.rows[0].id
+      await pool.query(`DELETE FROM sessions WHERE id = $1`, [oldestSessionId])
+      console.log(`Sessão mais antiga removida: ${oldestSessionId}`)
+  }
+    }
+    logger.info(`${searchActiveSessions.rowCount}`)
+    const newSession = await insertSession(sessionParameters)
+    logger.info(`token inserted successfully in: ${newSession.rows[0].created_at}`)
     logger.info(`login success with: ${email}`)
-
-    return res.json({
+    return res.status(200).json({
       message: "Login realizado com sucesso",
+      sessionToken: sessionToken
     })
-
   } catch (error) {
     logger.error(error)
     

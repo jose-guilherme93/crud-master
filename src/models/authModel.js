@@ -2,7 +2,6 @@ import { pool } from "../../utils/connectDatabase.js"
 import {generateBigIntId} from '../../utils/generateBigInt.js'
 
 export const searchUserByEmail = async (email) => {
-
     const responseQuery = await pool.query('SELECT * FROM users WHERE email = $1', [email])
     return responseQuery.rows[0]
 }
@@ -16,7 +15,7 @@ export const searchEmailRegistered = async (email, recoveryToken) => {
     return responseQuery
 }
 
-export const insertTokenInDB = async (fields, recoveryToken) => {
+export const insertRecoveryTokenInDB = async (fields, recoveryToken) => {
   try {
     const userId = fields.id
     const idRecovery = generateBigIntId()
@@ -47,9 +46,12 @@ export const insertTokenInDB = async (fields, recoveryToken) => {
     console.error("❌ Erro ao inserir token:", error)
     throw error;
   }
-};
+}
 
-export const insertTokenSession = async (sessionParameters, sessionToken) => {
+
+// LOGIN
+
+export const insertSession = async (sessionParameters) => {
   const {sessionId, userId, browser, ip, expiresAt} = sessionParameters
   try {
     const query = `
@@ -65,11 +67,11 @@ export const insertTokenSession = async (sessionParameters, sessionToken) => {
       RETURNING *;
     `
 
-    const values = [sessionId, userId, browser, ip, expiresAt];
+    const values = [sessionId, userId, browser, ip, expiresAt]
 
     const responseQuery = await pool.query(query, values)
 
-    return responseQuery.rows[0]
+    return responseQuery
   } catch (error) {
     console.error("❌ Erro ao inserir token de sessão:", error)
     throw error;
