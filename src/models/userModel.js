@@ -64,3 +64,11 @@ export const getAllUsersDB = async () => {
 
   return responseQuery
 }
+ 
+ export const getSessionByIdDb = async (id) => {
+
+    const query = `SELECT * FROM sessions WHERE user_id = $1`
+    const responseQuery = await pool.query(query, [id])
+    return responseQuery
+  
+}

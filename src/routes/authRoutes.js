@@ -11,4 +11,5 @@ const router = Router()
 router.post("/login", loginController)
 router.post("/recovery", authMiddleware, recoveryController)
 router.post("/reset-password/", resetPasswordController)
+
 export default router

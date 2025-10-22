@@ -1,6 +1,7 @@
 
 import { logger } from "../../logger.js"
-import { checkUser, createUserDB, deleteUserDB, getAllUsersDB, getUserByID, updateUserDB } from "../models/userModel.js"
+import { pool } from "../../utils/connectDatabase.js"
+import { checkUser, createUserDB, deleteUserDB, getAllUsersDB, getSessionByIdDb, getUserByID, updateUserDB } from "../models/userModel.js"
 import * as z from 'zod'
 
 export const getAllUsers = async (req, res) => { 
@@ -117,6 +118,28 @@ export const getUserByIdController = async (req, res) => {
 
     } catch(error) {
         logger.error("erro ao buscar usuário no banco: ", error)
+
+        res.status(500).json({
+            message: "internal server error",
+            error: error
+        })
+
+    }
+}
+
+
+
+export const getSessionByIdController = async (req, res) => {
+    const {id} = req.params
+
+    try {
+        logger.info(`searching sessions in DB`)
+        const result = await getSessionByIdDb(id)
+        result.rowCount > 0 ? logger.info("DB: consult ok") : ''
+        res.status(200).json({message:result.rows})
+       
+    } catch(error) {
+        logger.error("erro ao buscar sessões no banco: ", error)
 
         res.status(500).json({
             message: "internal server error",

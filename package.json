@@ -4,9 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "vitest",
+    "test": "node --env-file=.env ./node_modules/vitest/vitest.mjs",
     "start": "node --env-file=.env --watch-path=src src/server.js",
-     "migrate": "node --env-file=.env exec-migrations.js"
+     "migrate": "node --env-file=.env exec-migrations.js",
+      "generate:tests": "node generate-tests.js"
   },
   "keywords": [],
   "type": "module",
