@@ -105,7 +105,7 @@ export const updateUserByIdController = async (req, res) => {
 
 export const getUserByIdController = async (req, res) => {
     const {id} = req.params
-
+    
     try {
         const getUser = await getUserByID(id)
 

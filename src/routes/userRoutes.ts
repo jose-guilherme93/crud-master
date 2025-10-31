@@ -1,4 +1,4 @@
-import {Router} from 'express'
+import express, {Router} from 'express'
 import { 
     getUserByIdController,
     createUserController,
@@ -9,8 +9,7 @@ import {
      } from '../controllers/userController.js'
 
 
-const router = Router()
-router.get('/', getAllUsers)
+const router: Router = express.Router()
 router.get('/:id', getUserByIdController)
 router.post('/', createUserController)
 router.delete('/:id', deleteUserController)
