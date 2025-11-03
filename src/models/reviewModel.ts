@@ -1,8 +1,24 @@
 
-import { pool } from "../../utils/connectDatabase.js"
+import { pool } from "../utils/connectDatabase.js"
 
 
-export async function createReviewDB(params) {
+interface ReviewParams {
+  user_id: number;
+  game_id: number;
+  score: number;
+  review_text: string;
+}
+
+interface Review {
+  id: number;
+  user_id: number;
+  game_id: number;
+  score: number;
+  review_text: string;
+  created_at: Date;
+}
+
+export async function createReviewDB(params: ReviewParams): Promise<Review> {
   const query = `
     INSERT INTO reviews (user_id, game_id, score, review_text)
     VALUES ($1, $2, $3, $4)

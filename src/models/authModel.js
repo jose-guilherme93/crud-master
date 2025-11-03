@@ -1,5 +1,5 @@
-import { pool } from "../../utils/connectDatabase.js"
-import {generateBigIntId} from '../../utils/generateBigInt.js'
+import { pool } from "../utils/connectDatabase.js"
+import {generateBigIntId} from '../utils/generateBigInt.js'
 
 export const searchUserByEmail = async (email) => {
     const responseQuery = await pool.query('SELECT * FROM users WHERE email = $1', [email])

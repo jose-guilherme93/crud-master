@@ -1,13 +1,21 @@
 
-import jwt from 'jsonwebtoken'
+import type { NextFunction, Response, Request } from 'express'
+import jwt, { JwtPayload } from 'jsonwebtoken'
+
+declare global {
+  namespace Express {
+    interface Request {
+      user?: string | JwtPayload
+    }
+  }
+}
 
 
-
-export const validateIdParam = (req, res, next) => {
+export const validateIdParam = (req: Request, res: Response, next: NextFunction) => {
     const {id} = req.params
     if(!id || id.trim() === '') {
 
-        return res.status(400).json({message: "é necessáirio fornecer um id válido"})
+        return res.status(400).json({message: "need a valid id"})
     }
 
     next()
@@ -15,7 +23,7 @@ export const validateIdParam = (req, res, next) => {
 
 
 export const validateBodyFields = (requiredFields = []) => {
-  return (req, res, next) => {
+  return (req: Request, res: Response, next: NextFunction) => {
     const missingFields = requiredFields.filter(field => {
       const value = req.body[field]
       return value === undefined || value === null || value === ''
@@ -33,13 +41,15 @@ export const validateBodyFields = (requiredFields = []) => {
 
 
 
-
-export const authMiddleware = (req, res, next) => {
+export const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
   const authHeader = req.headers["authorization"]
   const token = authHeader && authHeader.split(" ")[1]
   if (!token) return res.status(401).json({ message: "Token não fornecido" })
 
-  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+  const jwtSecret = process.env.JWT_SECRET
+  if (!jwtSecret) return res.status(500).json({ message: "JWT_SECRET undefined" })
+
+  jwt.verify(token, jwtSecret, (err, user) => {
     if (err) return res.status(403).json({ message: "Token inválido" })
     req.user = user
     next()

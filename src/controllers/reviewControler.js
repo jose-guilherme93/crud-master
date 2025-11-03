@@ -1,6 +1,6 @@
 
 import { createReviewDB } from "../models/reviewModel.js"
-import { pool } from "../../utils/connectDatabase.js"
+import { pool } from "../utils/connectDatabase.js"
 export const getReviewByIdController = async(req, res) => {
 }
 
@@ -10,6 +10,7 @@ export const createReviewController = async(req, res) => {
         score: req.body.score,
         game_id: req.body.game_id,
         user_id: req.body.user_id
+        
      }
     try {
     

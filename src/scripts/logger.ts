@@ -9,7 +9,7 @@ const customFormat = printf(info => {
     error: '❌',
     debug: '🐛'
   };
-  return `${info.timestamp} ${icons[info.level] || ''} [${info.level.toUpperCase()}]: ${info.message}`
+  return `${info.timestamp} ${icons[info.level as keyof typeof icons] || ''} [${info.level.toUpperCase()}]: ${info.message}`
 });
 
 export const logger = createLogger({

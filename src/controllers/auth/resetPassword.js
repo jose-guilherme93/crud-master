@@ -1,5 +1,5 @@
-import { logger } from "../../../logger.js"
-import { pool } from "../../../utils/connectDatabase.js"
+import { logger } from "../../scripts/logger.js"
+import { pool } from "../../utils/connectDatabase.js"
 import * as z from 'zod'
 
 

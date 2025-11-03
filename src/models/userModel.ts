@@ -1,13 +1,29 @@
-import {pool} from '../../utils/connectDatabase.js'
+import { pool } from 'utils/connectDatabase.js'
+import {z} from 'zod'
 
 
-export const checkUser = async (username, email) => {
+const checkUserSchema = z.object({
+  username: z.string(),
+  email: z.email()
+})
+
+type checkUser = z.infer<typeof checkUserSchema>
+
+export const checkUser = async (userData: checkUser) => {
   const ifUserExistsQuery = `SELECT * FROM USERS WHERE username = $1 OR email = $2`
-  const checkResult = await pool.query(ifUserExistsQuery,[username, email])
+  const checkResult = await pool.query(ifUserExistsQuery,[userData.username, userData.email])
   return checkResult.rows
 }
 
-export const createUserDB = async (newUser) => {
+interface NewUser {
+  id: string;
+  username: string;
+  email: string;
+  password_hash: string;
+  avatar: string;
+}
+
+export const createUserDB = async (newUser: NewUser): Promise<NewUser> => {
 
   const {
     id,
@@ -27,15 +43,19 @@ export const createUserDB = async (newUser) => {
 }
 
 
-export const deleteUserDB = async (id) => {
+export const deleteUserDB = async (id: string) => {
   const query = `UPDATE users SET deleted_at = NOW() WHERE id = $1 RETURNING deleted_at;`
   const responseQuery = await pool.query(query, [id])
 
   return responseQuery
 }
 
-export const updateUserDB = async (id, userData ) => {
 
+interface UpdateUserData {
+  [key: string]: string
+}
+
+export const updateUserDB = async (id: string, userData: UpdateUserData) => {
   const keys = Object.keys(userData)
   const values = Object.values(userData)
   const setString = keys
@@ -44,14 +64,14 @@ export const updateUserDB = async (id, userData ) => {
     
   const query = `UPDATE users SET ${setString} WHERE id = $${keys.length + 1}  RETURNING *;
   `
-  const params = [...values, id, ]
+  const params = [...values, id]
   const responseQuery = await pool.query(query, params)
 
   return responseQuery
 }
+  
 
-
-export const getUserByID = async (id) => {
+export const getUserByID = async (id: string) => {
     const query = `SELECT * from users WHERE id = $1;`
     const responseQuery = await pool.query(query, [id])
 
@@ -65,7 +85,7 @@ export const getAllUsersDB = async () => {
   return responseQuery
 }
  
- export const getSessionByIdDb = async (id) => {
+ export const getSessionByIdDb = async (id: string) => {
 
     const query = `SELECT * FROM sessions WHERE user_id = $1`
     const responseQuery = await pool.query(query, [id])

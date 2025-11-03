@@ -1,4 +1,6 @@
 
+import { configDotenv } from "dotenv";
+configDotenv()
 import { Client } from "pg"
 import fs from "node:fs";
 import path from "node:path"
@@ -11,7 +13,7 @@ const __dirname = path.dirname(__filename)
 
 const client = new Client({
   host: process.env.PGHOST,
-  port: process.env.PGPORT,
+  port: process.env.PGPORT ? parseInt(process.env.PGPORT) : undefined,
   database: process.env.POSTGRES_DB,
   user: process.env.POSTGRES_USER,
   password: process.env.PGPASSWORD,

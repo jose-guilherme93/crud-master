@@ -1,5 +1,5 @@
 import { createGame, getAllGamesDB, getGameById, updateGameDB } from "../models/gameModel.js";
-import { logger } from "../../logger.js";
+import { logger } from "../scripts/logger.js";
 export const getGameByIdController = async (req, res) => {
     const { id } = req.params
     

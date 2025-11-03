@@ -1,4 +1,5 @@
-// createMigration.js
+import { configDotenv } from 'dotenv';
+configDotenv()
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -13,7 +14,7 @@ const migrationsDir = path.join(__dirname, "src", "migrations");
 // Gera timestamp no formato YYYYMMDDHHMMSS
 function getTimestamp() {
   const now = new Date();
-  const pad = (n) => n.toString().padStart(2, "0");
+  const pad = (n: number) => n.toString().padStart(2, "0");
 
   return (
     now.getFullYear().toString() +
@@ -25,7 +26,7 @@ function getTimestamp() {
   );
 }
 
-function createMigration(name) {
+function createMigration(name: string) {
   const timestamp = getTimestamp();
   const fileName = `${timestamp}_${name}.sql`;
   const filePath = path.join(migrationsDir, fileName);

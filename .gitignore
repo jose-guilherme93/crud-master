@@ -15,3 +15,7 @@ build/
 .vscode/
 
 insertMassive.js
+.env*
+.flaskenv*
+!.env.project
+!.env.vault

@@ -1,10 +1,10 @@
 
 import * as z from 'zod'
-import { logger } from "../../../logger.js"
+import { logger } from "../../scripts/logger.js"
 import  jwt  from 'jsonwebtoken'
 
 import {insertSession, searchUserByEmail} from '../../models/authModel.js'
-import { pool } from '../../../utils/connectDatabase.js'
+import { pool } from '../../utils/connectDatabase.js'
 
 
 const userSchema = z.object({

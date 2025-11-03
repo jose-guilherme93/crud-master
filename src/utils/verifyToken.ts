@@ -1,7 +1,7 @@
 import { pool } from "./connectDatabase.js"
 
 
-export const verifyToken = async (code) => {
+export const verifyToken = async (code: number) => {
     try {
 
         const responseQuery = await pool.query("SELECT * FROM recovery WHERE code = $1", [code])

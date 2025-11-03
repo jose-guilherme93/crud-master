@@ -1,4 +1,4 @@
-import { logger } from "../../../logger.js"
+import { logger } from "../../scripts/logger.js"
 import * as crypto from 'node:crypto'
 import {createTransport} from "nodemailer"
 import * as z from 'zod'
