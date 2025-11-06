@@ -31,3 +31,17 @@ jobs:
 
     - name: Rodar app com tsx
       run: pnpm exec tsx src/server.ts
+      
+    - name: Esperar Servidor responder
+      run: |
+        for ((i=1; i<=10; i++)); do
+          echo "Tentativa $i: verificando servidor..."
+          if curl --silent --fail http://localhost:3000 > /dev/null; then
+            echo "Servidor respondeu com sucesso!"
+            break
+          fi
+          sleep 2
+        done
+
+       
+    
