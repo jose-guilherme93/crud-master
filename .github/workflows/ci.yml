@@ -1,0 +1,33 @@
+name: CI - GameCatalog
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout código
+      uses: actions/checkout@v4
+
+    - name: Configurar Node.js 24
+      uses: actions/setup-node@v4
+      with:
+        node-version: 24
+        cache: 'pnpm'
+
+    - name: Instalar pnpm
+      run: npm install -g pnpm
+
+    - name: Instalar dependências
+      run: pnpm install --frozen-lockfile
+
+    - name: Verificar tipos TypeScript
+      run: pnpm exec tsc --noEmit
+
+    - name: Rodar app com tsx
+      run: pnpm exec tsx src/server.ts
