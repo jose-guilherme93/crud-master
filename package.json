@@ -9,7 +9,7 @@
     "migrate": "node --env-file=.env exec-migrations.js",
     "generate:tests": "node generate-tests.js",
     "dev": "pnpm exec tsx watch src/server.ts",
-    "build": ""
+    "build": "pnpm exec tsc"
   },
   "keywords": [],
   "type": "module",
