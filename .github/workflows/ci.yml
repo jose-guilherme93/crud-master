@@ -14,14 +14,14 @@ jobs:
     - name: Checkout código
       uses: actions/checkout@v4
 
-    - name: Instalar pnpm
-      run: npm install -g pnpm
-
     - name: Configurar Node.js 24
       uses: actions/setup-node@v4
       with:
         node-version: 24
         cache: 'pnpm'
+
+    - name: Instalar pnpm
+      run: npm install -g pnpm
 
     - name: Instalar dependências
       run: pnpm install --frozen-lockfile
@@ -29,19 +29,18 @@ jobs:
     - name: Verificar tipos TypeScript
       run: pnpm exec tsc --noEmit
 
-    - name: Rodar app com tsx
+    - name: Iniciar servidor em segundo plano
       run: pnpm exec tsx src/server.ts &
-      
-    - name: Esperar Servidor responder
+
+    - name: Esperar servidor responder
       run: |
         for ((i=1; i<=10; i++)); do
           echo "Tentativa $i: verificando servidor..."
-          if curl --silent --fail http://localhost:3000 > /dev/null; then
+          if curl --silent --fail http://localhost:3000/health > /dev/null; then
             echo "Servidor respondeu com sucesso!"
-            break
+            exit 0
           fi
           sleep 2
         done
-
-       
-    
+        echo "Servidor não respondeu após 10 tentativas."
+        exit 1
