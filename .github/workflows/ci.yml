@@ -30,4 +30,4 @@ jobs:
       run: pnpm exec tsc --noEmit
 
     - name: Rodar app com tsx
-      run: pnpm exec tsx src/index.ts
+      run: pnpm exec tsx src/server.ts
