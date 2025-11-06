@@ -1,11 +1,11 @@
 
 import type { NextFunction, Response, Request } from 'express'
-import jwt, { JwtPayload } from 'jsonwebtoken'
+import jwt, { type JwtPayload } from 'jsonwebtoken'
 
 declare global {
   namespace Express {
     interface Request {
-      user?: string | JwtPayload
+      user?: string | JwtPayload | undefined
     }
   }
 }

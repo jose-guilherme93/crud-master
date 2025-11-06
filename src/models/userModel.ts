@@ -22,7 +22,7 @@ interface NewUser {
   password_hash: string;
   avatar: string;
 }
-
+ 
 export const createUserDB = async (newUser: NewUser): Promise<NewUser> => {
 
   const {

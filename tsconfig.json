@@ -13,7 +13,7 @@
 
     // Migration & Safety
     "allowJs": true,
-    "checkJs": true,
+    "checkJs": false,
     "emitDeclarationOnly": false,
      "baseUrl": "./src",
 
@@ -46,5 +46,5 @@
     "resolveJsonModule": true
   },
    "include": ["./src/**/*.ts"],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules",  "**/*.js"]
 }
