@@ -59,29 +59,29 @@ jobs:
 
             volumes:
             pgdata:
-            EOF # <--- Delimitador final do Here Document. Deve estar na primeira coluna!
+            EOF
 
                 - name: 3. Transferir Arquivos via SCP
                     uses: appleboy/scp-action@v0.1.7
                     with:
-                    host: ${{ secrets.SSH_HOST }}
-                    username: ${{ secrets.SSH_USERNAME }}
-                    key: ${{ secrets.SSH_PRIVATE_KEY }}
-                    target: /home/${{ secrets.SSH_USERNAME }}/gamecatalog
+                    host: ${{ secrets.HOST }}
+                    username: ${{ secrets.USERNAME }}
+                    key: ${{ secrets.KEY }}
+                    target: /home/${{ secrets.USERNAME }}/gamecatalog
                     source: ".env,Dockerfile,package.json,pnpm-lock.yaml,tsconfig.json,src/,scripts/,docker-compose.prod.yml"
                     overwrite: true
 
                 - name: 4. Executar Deploy Remoto via SSH
                     uses: appleboy/ssh-action@v1.0.3
                     with:
-                    host: ${{ secrets.SSH_HOST }}
-                    username: ${{ secrets.SSH_USERNAME }}
-                    key: ${{ secrets.SSH_PRIVATE_KEY }}
+                    host: ${{ secrets.HOST }}
+                    username: ${{ secrets.USERNAME }}
+                    key: ${{ secrets.KEY }}
                     script: |
-                        cd /home/${{ secrets.SSH_USERNAME }}/gamecatalog
+                        cd /home/${{ secrets.USERNAME }}/gamecatalog
                         
                         # Garante que o usuário tem permissão para rodar docker e acessar os arquivos
-                        sudo chown -R ${{ secrets.SSH_USERNAME }}:${{ secrets.SSH_USERNAME }} .
+                        sudo chown -R ${{ secrets.USERNAME }}:${{ secrets.USERNAME }} .
                         
                         # Stop e remove os contêineres antigos, se existirem
                         docker compose -f docker-compose.prod.yml down
@@ -92,5 +92,5 @@ jobs:
                         # Limpeza: remove imagens antigas não usadas
                         docker image prune -f
                         
-                        # Opcional: Mostra o status dos contêineres
+                      
                         docker compose -f docker-compose.prod.yml ps
