@@ -1,4 +1,4 @@
-import { pool } from 'utils/connectDatabase.js'
+import { pool } from '@/utils/connectDatabase.js'
 import {z} from 'zod'
 
 

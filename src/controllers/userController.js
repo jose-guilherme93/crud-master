@@ -1,5 +1,4 @@
-
-import { logger } from 'scripts/logger.js'
+import { logger } from "@/scripts/logger.js"
 import { checkUser, createUserDB, deleteUserDB, getAllUsersDB, getSessionByIdDb, getUserByID, updateUserDB } from "../models/userModel.js"
 import * as z from 'zod'
 

@@ -5,6 +5,7 @@
      "lib": ["ES2024"],
     "module": "nodenext",
     "target": "esnext",
+    
 
     // Other Outputs
     "sourceMap": true,
@@ -15,7 +16,11 @@
     "allowJs": true,
     "checkJs": false,
     "emitDeclarationOnly": false,
-     "baseUrl": "./src",
+    "baseUrl": "./src",
+      "paths": {
+      "@/*": ["*"]
+    },
+ 
 
   // Stricter Typechecking Options
     "noUncheckedIndexedAccess": true,
@@ -46,5 +51,5 @@
     "resolveJsonModule": true
   },
    "include": ["./src/**/*.ts"],
-  "exclude": ["node_modules",  "**/*.js"]
+  "exclude": ["node_modules",  "./dist"]
 }
