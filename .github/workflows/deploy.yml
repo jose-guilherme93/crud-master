@@ -12,15 +12,15 @@ jobs:
       - name: 1. Checkout do Código
         uses: actions/checkout@v4
 
-      - name: 2. Configurar Variáveis de Ambiente e Arquivos de Deploy
+      - name: 2. Configurar Arquivos de Deploy (.env e docker-compose)
         run: |
-          echo "--- Criando .env de produção ---"
+          echo "--- Gerando .env de produção ---"
           echo "${{ secrets.PROD_ENV }}" > .env
-          cat .env
           
           echo "--- Gerando docker-compose.prod.yml ---"
+          # Conteúdo do docker-compose para produção
           cat <<'EOF' > docker-compose.prod.yml
-          version: '3.8'
+
 
           services:
             app:
@@ -49,7 +49,7 @@ jobs:
               restart: always
               environment:
                 POSTGRES_USER: ${POSTGRES_USER}
-                POSTGRES_PASSWORD: ${POSTES_PASSWORD}
+                POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
                 POSTGRES_DB: ${POSTGRES_DB}
               volumes:
                 - pgdata:/var/lib/postgresql/data
@@ -57,48 +57,45 @@ jobs:
           volumes:
             pgdata:
           EOF
-                    cat docker-compose.prod.yml
+                    cat docker-compose.prod.yml # Log para visibilidade
 
-                - name: 3. Transferir Arquivos via SCP (Mostrando o que será copiado)
-                  uses: appleboy/scp-action@v0.1.7
+                - name: 3. Transferir Arquivos (SCP)
+                  uses: appleboy/scp-action@v1
                   with:
-                    # Alterado para usar HOST
-                    host: ${{ secrets.HOST }} 
-                    # Alterado para usar USERNAME
-                    username: ${{ secrets.USERNAME }} 
-                    # Alterado para usar KEY
-                    key: ${{ secrets.KEY }} 
+                    host: ${{ secrets.HOST }}
+                    username: ${{ secrets.USERNAME }}
+                    key: ${{ secrets.KEY }}
+                    # Target seguro: Copia para o diretório 'gamecatalog' dentro da home do usuário
                     target: /home/${{ secrets.USERNAME }}/gamecatalog
+                    # Copia apenas os arquivos essenciais para o deploy Docker
                     source: ".env,Dockerfile,package.json,pnpm-lock.yaml,tsconfig.json,src/,scripts/,docker-compose.prod.yml"
                     overwrite: true
-                  run: echo "Arquivos copiados com sucesso."
 
-                - name: 4. Executar Deploy Remoto via SSH (Com Logs de Build e Status)
-                  uses: appleboy/ssh-action@v1.0.3
+                - name: 4. Executar Deploy Remoto (Docker Compose)
+                  uses: appleboy/ssh-action@v1
                   with:
-                    # Alterado para usar HOST
                     host: ${{ secrets.HOST }}
-                    # Alterado para usar USERNAME
                     username: ${{ secrets.USERNAME }}
-                    # Alterado para usar KEY
                     key: ${{ secrets.KEY }}
                     script: |
                       echo "--- Iniciando Deploy na VPS ---"
-                      cd /home/${{ secrets.USERNAME }}/gamecatalog
+                      DEPLOY_DIR=/home/${{ secrets.USERNAME }}/gamecatalog
                       
-                      echo "--- Verificando permissões ---"
+                      # Navega para o diretório
+                      cd $DEPLOY_DIR
+                      
+                      # Garante permissões (essencial após SCP)
                       sudo chown -R ${{ secrets.USERNAME }}:${{ secrets.USERNAME }} .
                       
                       echo "--- Parando e Removendo Contêineres Antigos ---"
                       docker compose -f docker-compose.prod.yml down --timeout 5
                       
-                      echo "--- Iniciando Build e Deploy (Isto deve levar tempo) ---"
+                      echo "--- Construindo a Imagem e Iniciando Serviço (Isto deve levar tempo) ---"
+                      # O --build aciona o 'pnpm run build' dentro do Dockerfile.
                       docker compose -f docker-compose.prod.yml up -d --build --force-recreate --verbose
                       
-                      echo "--- Verificação Final de Status ---"
+                      echo "--- Verificação de Status e Limpeza ---"
                       docker compose -f docker-compose.prod.yml ps
-                      
-                      echo "--- Limpeza de Imagens Antigas ---"
                       docker image prune -f
                       
-                      echo "Deploy concluído com sucesso!"
+                      echo "✅ Servidor reconstruído e iniciado com sucesso!"
