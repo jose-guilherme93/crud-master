@@ -1,101 +1,39 @@
-name: Deploy na VPS de Produção
+name: Deploy to VPS via SSH
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main  # ou a branch que você usa para produção
 
 jobs:
   deploy:
+    name: Copiar projeto para VPS
     runs-on: ubuntu-latest
-    
+
     steps:
-      - name: 1. Checkout do Código
-        uses: actions/checkout@v4
+      - name: Checkout do código
+        uses: actions/checkout@v3
 
-      - name: 2. Configurar Arquivos de Deploy (.env e docker-compose)
-        run: |
-          echo "--- Gerando .env de produção ---"
-          echo "${{ secrets.PROD_ENV }}" > .env
-          
-          echo "--- Gerando docker-compose.prod.yml ---"
-          # Conteúdo do docker-compose para produção
-          cat <<'EOF' > docker-compose.prod.yml
+      - name: Instalar rsync
+        run: sudo apt-get install -y rsync
 
+      - name: Copiar arquivos para VPS
+        uses: burnett01/rsync-deployments@v2.1.1
+        with:
+          switches: -avz --delete
+          path: ./
+          remote_path: /home/USERNAME/meu-projeto  # ajuste conforme necessário
+          remote_host: ${{ secrets.HOST }}
+          remote_user: ${{ secrets.USERNAME }}
+          remote_key: ${{ secrets.KEY }}
 
-          services:
-            app:
-              build:
-                context: .
-                dockerfile: Dockerfile
-              container_name: gamecatalog_app
-              restart: always
-              ports:
-                - "3000:3000"
-              environment:
-                PG_HOST: postgres
-                PG_USER: ${PG_USER} 
-                PG_PASSWORD: ${PG_PASSWORD}
-                PG_DATABASE: ${PG_DATABASE}
-                NODE_ENV: production
-                JWT_SECRET: ${JWT_SECRET}
-              depends_on:
-                - postgres
-              env_file:
-                - .env
-                
-            postgres:
-              image: postgres:15
-              container_name: postgres_crud
-              restart: always
-              environment:
-                POSTGRES_USER: ${POSTGRES_USER}
-                POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-                POSTGRES_DB: ${POSTGRES_DB}
-              volumes:
-                - pgdata:/var/lib/postgresql/data
-
-          volumes:
-            pgdata:
-          EOF
-                    cat docker-compose.prod.yml # Log para visibilidade
-
-                - name: 3. Transferir Arquivos (SCP)
-                  uses: appleboy/scp-action@v1
-                  with:
-                    host: ${{ secrets.HOST }}
-                    username: ${{ secrets.USERNAME }}
-                    key: ${{ secrets.KEY }}
-                    # Target seguro: Copia para o diretório 'gamecatalog' dentro da home do usuário
-                    target: /home/${{ secrets.USERNAME }}/gamecatalog
-                    # Copia apenas os arquivos essenciais para o deploy Docker
-                    source: ".env,Dockerfile,package.json,pnpm-lock.yaml,tsconfig.json,src/,scripts/,docker-compose.prod.yml"
-                    overwrite: true
-
-                - name: 4. Executar Deploy Remoto (Docker Compose)
-                  uses: appleboy/ssh-action@v1
-                  with:
-                    host: ${{ secrets.HOST }}
-                    username: ${{ secrets.USERNAME }}
-                    key: ${{ secrets.KEY }}
-                    script: |
-                      echo "--- Iniciando Deploy na VPS ---"
-                      DEPLOY_DIR=/home/${{ secrets.USERNAME }}/gamecatalog
-                      
-                      # Navega para o diretório
-                      cd $DEPLOY_DIR
-                      
-                      # Garante permissões (essencial após SCP)
-                      sudo chown -R ${{ secrets.USERNAME }}:${{ secrets.USERNAME }} .
-                      
-                      echo "--- Parando e Removendo Contêineres Antigos ---"
-                      docker compose -f docker-compose.prod.yml down --timeout 5
-                      
-                      echo "--- Construindo a Imagem e Iniciando Serviço (Isto deve levar tempo) ---"
-                      # O --build aciona o 'pnpm run build' dentro do Dockerfile.
-                      docker compose -f docker-compose.prod.yml up -d --build --force-recreate --verbose
-                      
-                      echo "--- Verificação de Status e Limpeza ---"
-                      docker compose -f docker-compose.prod.yml ps
-                      docker image prune -f
-                      
-                      echo "✅ Servidor reconstruído e iniciado com sucesso!"
+      - name: Executar comandos remotos (build e restart)
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.KEY }}
+          script: |
+            cd /home/USERNAME/meu-projeto
+            docker compose down || true
+            docker compose up -d --build
