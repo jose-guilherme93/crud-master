@@ -3,8 +3,7 @@ name: Deploy na VPS de Produção
 on:
   push:
     branches: [main]
-  pull_request:
-    branches: [main]
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -14,83 +13,92 @@ jobs:
         uses: actions/checkout@v4
 
       - name: 2. Configurar Variáveis de Ambiente e Arquivos de Deploy
-        # Usamos pipe (|) para indicar que é um bloco literal de várias linhas
         run: |
-          # Cria um arquivo .env de produção na pasta do projeto, obtendo da Secret
+          echo "--- Criando .env de produção ---"
           echo "${{ secrets.PROD_ENV }}" > .env
+          cat .env
           
-          # Cria o arquivo docker-compose.prod.yml
-          # Usamos cat <<'EOF' para que o shell não expanda as variáveis de ambiente ($PG_USER, etc.)
+          echo "--- Gerando docker-compose.prod.yml ---"
           cat <<'EOF' > docker-compose.prod.yml
-            version: '3.8'
+          version: '3.8'
 
-            services:
+          services:
             app:
-                build:
+              build:
                 context: .
                 dockerfile: Dockerfile
-                container_name: gamecatalog_app
-                restart: always
-                ports:
+              container_name: gamecatalog_app
+              restart: always
+              ports:
                 - "3000:3000"
-                environment:
-                # As variáveis são lidas do .env na VPS
+              environment:
                 PG_HOST: postgres
                 PG_USER: ${PG_USER} 
                 PG_PASSWORD: ${PG_PASSWORD}
                 PG_DATABASE: ${PG_DATABASE}
                 NODE_ENV: production
                 JWT_SECRET: ${JWT_SECRET}
-                depends_on:
+              depends_on:
                 - postgres
-                env_file:
-                - .env # Linka o arquivo .env criado acima
+              env_file:
+                - .env
                 
             postgres:
-                image: postgres:15
-                container_name: postgres_crud
-                restart: always
-                environment:
-                POSTGRES_USER: ${PG_USER}
-                POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+              image: postgres:15
+              container_name: postgres_crud
+              restart: always
+              environment:
+                POSTGRES_USER: ${POSTGRES_USER}
+                POSTGRES_PASSWORD: ${POSTES_PASSWORD}
                 POSTGRES_DB: ${POSTGRES_DB}
-                volumes:
+              volumes:
                 - pgdata:/var/lib/postgresql/data
 
-            volumes:
+          volumes:
             pgdata:
-            EOF
+          EOF
+                    cat docker-compose.prod.yml
 
-                - name: 3. Transferir Arquivos via SCP
-                    uses: appleboy/scp-action@v0.1.7
-                    with:
-                    host: ${{ secrets.HOST }}
-                    username: ${{ secrets.USERNAME }}
-                    key: ${{ secrets.KEY }}
+                - name: 3. Transferir Arquivos via SCP (Mostrando o que será copiado)
+                  uses: appleboy/scp-action@v0.1.7
+                  with:
+                    # Alterado para usar HOST
+                    host: ${{ secrets.HOST }} 
+                    # Alterado para usar USERNAME
+                    username: ${{ secrets.USERNAME }} 
+                    # Alterado para usar KEY
+                    key: ${{ secrets.KEY }} 
                     target: /home/${{ secrets.USERNAME }}/gamecatalog
                     source: ".env,Dockerfile,package.json,pnpm-lock.yaml,tsconfig.json,src/,scripts/,docker-compose.prod.yml"
                     overwrite: true
+                  run: echo "Arquivos copiados com sucesso."
 
-                - name: 4. Executar Deploy Remoto via SSH
-                    uses: appleboy/ssh-action@v1.0.3
-                    with:
+                - name: 4. Executar Deploy Remoto via SSH (Com Logs de Build e Status)
+                  uses: appleboy/ssh-action@v1.0.3
+                  with:
+                    # Alterado para usar HOST
                     host: ${{ secrets.HOST }}
+                    # Alterado para usar USERNAME
                     username: ${{ secrets.USERNAME }}
+                    # Alterado para usar KEY
                     key: ${{ secrets.KEY }}
                     script: |
-                        cd /home/${{ secrets.USERNAME }}/gamecatalog
-                        
-                        # Garante que o usuário tem permissão para rodar docker e acessar os arquivos
-                        sudo chown -R ${{ secrets.USERNAME }}:${{ secrets.USERNAME }} .
-                        
-                        # Stop e remove os contêineres antigos, se existirem
-                        docker compose -f docker-compose.prod.yml down
-                        
-                        # BUILD & START: Constrói a imagem (otimizada) e sobe os contêineres
-                        docker compose -f docker-compose.prod.yml up -d --build --force-recreate
-                        
-                        # Limpeza: remove imagens antigas não usadas
-                        docker image prune -f
-                        
+                      echo "--- Iniciando Deploy na VPS ---"
+                      cd /home/${{ secrets.USERNAME }}/gamecatalog
                       
-                        docker compose -f docker-compose.prod.yml ps
+                      echo "--- Verificando permissões ---"
+                      sudo chown -R ${{ secrets.USERNAME }}:${{ secrets.USERNAME }} .
+                      
+                      echo "--- Parando e Removendo Contêineres Antigos ---"
+                      docker compose -f docker-compose.prod.yml down --timeout 5
+                      
+                      echo "--- Iniciando Build e Deploy (Isto deve levar tempo) ---"
+                      docker compose -f docker-compose.prod.yml up -d --build --force-recreate --verbose
+                      
+                      echo "--- Verificação Final de Status ---"
+                      docker compose -f docker-compose.prod.yml ps
+                      
+                      echo "--- Limpeza de Imagens Antigas ---"
+                      docker image prune -f
+                      
+                      echo "Deploy concluído com sucesso!"
