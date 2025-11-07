@@ -14,8 +14,8 @@ const __dirname = path.dirname(__filename)
 const client = new Client({
   host: process.env.PGHOST,
   port: process.env.PGPORT ? parseInt(process.env.PGPORT) : undefined,
-  database: process.env.POSTGRES_DB,
-  user: process.env.POSTGRES_USER,
+  database: process.env.POSTGRESDB,
+  user: process.env.POSTGRESUSER,
   password: process.env.PGPASSWORD,
 })
 
@@ -39,7 +39,7 @@ async function runMigrations() {
 
     await ensureMigrationsTable()
 
-    const migrationsDir = path.join(__dirname, "src", "migrations")
+    const migrationsDir = path.join(__dirname, "../migrations")
     const files = fs
       .readdirSync(migrationsDir)
       .filter((f) => f.endsWith(".sql"))

@@ -46,8 +46,8 @@ Siga os passos abaixo para configurar e iniciar o projeto no seu ambiente de des
 
     ```env
         PGHOST=localhost
-        POSTGRES_DB=cruddb
-        POSTGRES_USER=postgres
+        POSTGRESDB=cruddb
+        POSTGRESUSER=postgres
         PGPASSWORD=crudpass
         DATABASE_URL=postgresql://postgres:crudpass@localhost/cruddb
     ```

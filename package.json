@@ -6,10 +6,10 @@
   "scripts": {
     "test": "node --env-file=.env ./node_modules/vitest/vitest.mjs",
     "start": "node dist/server.js",
-    "migrate": "node exec-migrations.js",
+    "migrate": "node  dist/scripts/exec-migrations.js",
     "generate:tests": "node generate-tests.js",
     "dev": "pnpm exec tsx watch src/server.ts",
-    "build": "tsc && tsc-alias"
+    "build": "tsc && tsc-alias && cp -R src/migrations dist/migrations"
   },
   "keywords": [],
   "type": "module",

@@ -1,14 +1,29 @@
-
-
 services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: gamecatalog_app
+    restart: always
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+    depends_on:
+      - postgres
+
   postgres:
     image: postgres:15
     container_name: postgres_crud
     restart: always
+    env_file:
+      - .env
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: crudpass
-      POSTGRES_DB: cruddb
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     ports:
       - "5432:5432"
     volumes:
