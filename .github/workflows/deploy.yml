@@ -1,39 +1,37 @@
-name: Deploy to VPS via SSH
+name: Deploy to VPS via SCP
 
 on:
   push:
     branches:
-      - main
+      - main  # ou a branch que você usa para produção
 
 jobs:
   deploy:
-    name: Copiar projeto para VPS
+    name: Copiar e iniciar projeto na VPS
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout do código
         uses: actions/checkout@v3
 
-      - name: Instalar rsync
-        run: sudo apt-get install -y rsync
-
-      - name: Copiar arquivos para VPS com rsync
-        uses: burnett01/rsync-deployments@v1.1.0
-        with:
-          switches: -avz --delete
-          path: ./
-          remote_path: /home/USERNAME/meu-projeto  # ajuste conforme necessário
-          remote_host: ${{ secrets.HOST }}
-          remote_user: ${{ secrets.USERNAME }}
-          remote_key: ${{ secrets.KEY }}
-
-      - name: Executar comandos remotos (build e restart)
-        uses: appleboy/ssh-action@v0.1.10
+      - name: Copy files via SCP
+        uses: appleboy/scp-action@v1
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.KEY }}
+          port: 22
+          source: "."
+          target: "/home/${{ secrets.USERNAME }}/node-vps"
+
+      - name: Executar comandos remotos via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.KEY }}
+          port: 22
           script: |
-            cd /home/USERNAME/meu-projeto
+            cd /home/${{ secrets.USERNAME }}/node-vps
             docker compose down || true
             docker compose up -d --build
