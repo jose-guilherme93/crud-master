@@ -2,9 +2,9 @@ name: Deploy na VPS de Produção
 
 on:
   push:
-    branches:
-      - main # Dispara o workflow sempre que houver um push na branch 'main'
-
+    branches: [main]
+  pull_request:
+    branches: [main]
 jobs:
   deploy:
     runs-on: ubuntu-latest
