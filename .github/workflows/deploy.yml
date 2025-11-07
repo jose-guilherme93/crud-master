@@ -1,0 +1,96 @@
+name: Deploy na VPS de Produção
+
+on:
+  push:
+    branches:
+      - main # Dispara o workflow sempre que houver um push na branch 'main'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 1. Checkout do Código
+        uses: actions/checkout@v4
+
+      - name: 2. Configurar Variáveis de Ambiente e Arquivos de Deploy
+        # Usamos pipe (|) para indicar que é um bloco literal de várias linhas
+        run: |
+          # Cria um arquivo .env de produção na pasta do projeto, obtendo da Secret
+          echo "${{ secrets.PROD_ENV }}" > .env
+          
+          # Cria o arquivo docker-compose.prod.yml
+          # Usamos cat <<'EOF' para que o shell não expanda as variáveis de ambiente ($PG_USER, etc.)
+          cat <<'EOF' > docker-compose.prod.yml
+            version: '3.8'
+
+            services:
+            app:
+                build:
+                context: .
+                dockerfile: Dockerfile
+                container_name: gamecatalog_app
+                restart: always
+                ports:
+                - "3000:3000"
+                environment:
+                # As variáveis são lidas do .env na VPS
+                PG_HOST: postgres
+                PG_USER: ${PG_USER} 
+                PG_PASSWORD: ${PG_PASSWORD}
+                PG_DATABASE: ${PG_DATABASE}
+                NODE_ENV: production
+                JWT_SECRET: ${JWT_SECRET}
+                depends_on:
+                - postgres
+                env_file:
+                - .env # Linka o arquivo .env criado acima
+                
+            postgres:
+                image: postgres:15
+                container_name: postgres_crud
+                restart: always
+                environment:
+                POSTGRES_USER: ${PG_USER}
+                POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+                POSTGRES_DB: ${POSTGRES_DB}
+                volumes:
+                - pgdata:/var/lib/postgresql/data
+
+            volumes:
+            pgdata:
+            EOF # <--- Delimitador final do Here Document. Deve estar na primeira coluna!
+
+                - name: 3. Transferir Arquivos via SCP
+                    uses: appleboy/scp-action@v0.1.7
+                    with:
+                    host: ${{ secrets.SSH_HOST }}
+                    username: ${{ secrets.SSH_USERNAME }}
+                    key: ${{ secrets.SSH_PRIVATE_KEY }}
+                    target: /home/${{ secrets.SSH_USERNAME }}/gamecatalog
+                    source: ".env,Dockerfile,package.json,pnpm-lock.yaml,tsconfig.json,src/,scripts/,docker-compose.prod.yml"
+                    overwrite: true
+
+                - name: 4. Executar Deploy Remoto via SSH
+                    uses: appleboy/ssh-action@v1.0.3
+                    with:
+                    host: ${{ secrets.SSH_HOST }}
+                    username: ${{ secrets.SSH_USERNAME }}
+                    key: ${{ secrets.SSH_PRIVATE_KEY }}
+                    script: |
+                        cd /home/${{ secrets.SSH_USERNAME }}/gamecatalog
+                        
+                        # Garante que o usuário tem permissão para rodar docker e acessar os arquivos
+                        sudo chown -R ${{ secrets.SSH_USERNAME }}:${{ secrets.SSH_USERNAME }} .
+                        
+                        # Stop e remove os contêineres antigos, se existirem
+                        docker compose -f docker-compose.prod.yml down
+                        
+                        # BUILD & START: Constrói a imagem (otimizada) e sobe os contêineres
+                        docker compose -f docker-compose.prod.yml up -d --build --force-recreate
+                        
+                        # Limpeza: remove imagens antigas não usadas
+                        docker image prune -f
+                        
+                        # Opcional: Mostra o status dos contêineres
+                        docker compose -f docker-compose.prod.yml ps
