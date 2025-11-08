@@ -14,6 +14,11 @@ jobs:
       - name: Checkout do código
         uses: actions/checkout@v3
 
+      - name: Copy .env file to VPS
+        run: |
+          echo "${{ secrets.ENV_FILE }}" > /home/${{ secrets.USERNAME }}/node-vps/.env
+        shell: bash
+
       - name: Copy files via SCP
         uses: appleboy/scp-action@v1
         with:
