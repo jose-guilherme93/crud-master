@@ -87,7 +87,7 @@ jobs:
             docker compose down
 
             echo "Run build"
-            npm run build
+            pnpm run build
 
             echo "Removing old images..."
             docker image prune -af
