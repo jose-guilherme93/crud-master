@@ -38,20 +38,10 @@ jobs:
           key: ${{ secrets.KEY }}
           port: 22
           
-          # 1. Define TODAS as variáveis no ambiente do Runner (essencial para o envs)
-        env:
-          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
-          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
-          PGHOST: ${{ secrets.PGHOST }}
-          PGPORT: ${{ secrets.PGPORT }}
-            
-          # 2. CRUCIAL: Lista TODAS as variáveis (incluindo HOST/PORT) para exportação remota.
-          envs: POSTGRES_USER,POSTGRES_PASSWORD,POSTGRES_DB,PGHOST,PGPORT
-          
           script: |
             cd /home/${{ secrets.USERNAME }}/node-vps
             docker compose down || true
             
-            # Comando limpo: as variáveis já estarão exportadas pelo ssh-action
-            docker compose up -d --build
+            # --- INJEÇÃO FORÇADA EM LINHA ÚNICA ---
+            # O GitHub Actions injeta os valores dos secrets diretamente nesta linha antes de enviar o SSH.
+            POSTGRES_USER="${{ secrets.POSTGRES_USER }}" POSTGRES_PASSWORD="${{ secrets.POSTGRES_PASSWORD }}" POSTGRES_DB="${{ secrets.POSTGRES_DB }}" PGHOST="${{ secrets.PGHOST }}" PGPORT="${{ secrets.PGPORT }}" docker compose up -d --build
