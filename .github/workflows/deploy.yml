@@ -44,5 +44,6 @@ jobs:
           port: 22
           script: |
             cd /home/${{ secrets.USERNAME }}/node-vps
-            docker compose down || true
+            docker-compose --env-file .env.db up -d postgres
+            docker-compose --env-file .env up -d app
             docker compose up -d --build
