@@ -13,7 +13,7 @@ jobs:
     steps:
       - name: Checkout do código
         uses: actions/checkout@v3
-        
+
       - name: Criar .env na VPS via SSH
         uses: appleboy/ssh-action@v1
         with:
@@ -22,6 +22,7 @@ jobs:
           key: ${{ secrets.KEY }}
           port: 22
           script: |
+            echo "${{ secrets.ENV_FILE_DB }}" > /home/${{ secrets.USERNAME }}/node-vps/.env.db
             echo "${{ secrets.ENV_FILE }}" > /home/${{ secrets.USERNAME }}/node-vps/.env
 
       - name: Copy files via SCP
