@@ -6,7 +6,7 @@
   "scripts": {
     "test": "node --env-file=.env ./node_modules/vitest/vitest.mjs",
     "start": "node dist/server.js",
-    "migrate": "node  dist/scripts/exec-migrations.js",
+    "migrate": "node  dist/scripts/exec-migrations.mjs",
     "generate:tests": "node generate-tests.js",
     "dev": "pnpm exec tsx watch src/server.ts",
     "build": "tsc && tsc-alias && mkdir -p dist/migrations && cp -R src/migrations dist/migrations"
