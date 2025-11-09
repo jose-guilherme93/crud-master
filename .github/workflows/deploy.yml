@@ -1,77 +1,74 @@
-# .github/workflows/deploy.yml
-
-name: CD - Deploy Rápido para VPS
+# .github/workflows/main.yml
+name: CI/CD Pipeline - SCP and SSH Deploy
 
 on:
   push:
     branches:
-      - main # Dispara o deploy no push para a branch principal
+      - main # Roda o pipeline toda vez que houver um push na branch main
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-   
-
     steps:
-      - name: ⬇️ Checkout do Repositório
+      - name: Checkout do código
         uses: actions/checkout@v4
 
-      - name: 🔑 Configurar Acesso SSH com Chave Privada
-        # Injeta a chave SSH no agente do runner para SCP e SSH.
+      - name: Setup SSH
+        # Configura a chave privada para os passos de SCP e SSH subsequentes
         uses: webfactory/ssh-agent@v0.9.0
         with:
-          ssh-private-key: ${{ secrets.KEY}}
+          ssh-private-key: ${{ secrets.KEY }}
 
-      - name: 📦 Enviar Arquivos com SCP
-        # Copia todos os arquivos e pastas necessários para o build e compose da VPS.
-        # Ajuste a lista de arquivos/pastas conforme a estrutura real do seu projeto.
-        run: |
-          REMOTE_DIR=/var/www/gamecatalog
-          SSH_USER=${{ secrets.USERNAME }}
-          HOST=${{ secrets.HOST }}
-          
-          # Cria o diretório remoto se não existir, ignorando erros se já existir
-          ssh -o StrictHostKeyChecking=no $SSH_USER@$HOST "mkdir -p $REMOTE_DIR"
+      - name: Preparar e Compactar Arquivos para SCP
+        # Cria um arquivo tarball (tar.gz) com todo o contexto de build
+        run: tar -czf app.tar.gz .
+        
+      - name: Transferir Arquivos (SCP) para a VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          # O arquivo compactado a ser copiado
+          source: "app.tar.gz" 
+          # O diretório de destino na VPS. Mantenha o nome do arquivo.
+          target: "/tmp" 
+          # Garante que ele use a chave SSH configurada no passo anterior
+          key: ${{ secrets.KEY }}
 
-          echo "Iniciando cópia dos arquivos..."
-          
-          # Lista de arquivos/pastas a serem copiados (EXEMPLO)
-          # Você deve incluir tudo que o Dockerfile e docker-compose precisam:
-          FILES_TO_COPY="./docker-compose.yml ./Dockerfile ./src ./package.json ./pnpm-lock.yaml" 
-          
-          # Cópia usando SCP
-          scp -r -o StrictHostKeyChecking=no $FILES_TO_COPY $SSH_USER@$HOST:$REMOTE_DIR/
-          echo "Cópia concluída via SCP."
-
-      - name: ⚙️ Executar Deploy Remoto (Build & Up)
-        # Conecta-se à VPS via SSH e executa o Docker Compose Up,
-        # injetando todas as secrets como variáveis de ambiente para o compose.
-        run: |
-          REMOTE_DIR=/var/www/gamecatalog
-          SSH_USER=${{ secrets.USERNAME }}
-          HOST=${{ secrets.HOST }}
-          
-          # Conecta via SSH e executa os comandos
-          ssh -o StrictHostKeyChecking=no $SSH_USER@$HOST << 'EOF'
+      - name: Conectar na VPS e Implantar (SSH)
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          # Assegure que as variáveis do .env existam no diretório de deploy
+          script: |
+            # 1. Diretório de Deploy
+            APP_DIR="/var/www/gamecatalog"
             
-            # Navega para o diretório de deploy
-            cd $REMOTE_DIR
-
-            echo "Injetando .env e reiniciando serviços..."
-
-            # 🚀 INJEÇÃO RÁPIDA DE SECRETS DIRETAMENTE NO COMANDO DOCKER COMPOSE
-            # Isso garante que o docker-compose lendo "${VAR}" no arquivo yaml
-            # encontre o valor no ambiente.
+            # 2. Cria o diretório se não existir
+            mkdir -p $APP_DIR
             
-            POSTGRES_DB="${{ secrets.POSTGRES_DB }}" \
-            POSTGRES_USER="${{ secrets.POSTGRES_USER }}" \
-            POSTGRES_PASSWORD="${{ secrets.POSTGRES_PASSWORD }}" \
-            PGPORT="${{ secrets.PGPORT }}" \
-            HOST="${{ secrets.HOST }}" \
-            KEY="${{ secrets.KEY }}" \
-            DATABASE_URL="${{ secrets.DATABASE_URL }}" \
-            USERNAME="${{ secrets.USERNAME }}" \
-            docker compose up -d --build --force-recreate
+            # 3. Move o tarball para o diretório de deploy
+            mv /tmp/app.tar.gz $APP_DIR/app.tar.gz
+            
+            # 4. Navega até o diretório
+            cd $APP_DIR
+            
+            # 5. Descompacta e sobrescreve (o .env deve ser mantido)
+            echo "Descompactando novos arquivos e código..."
+            # O comando --overwrite garante que o código novo seja aplicado
+            tar -xzf app.tar.gz --overwrite
+            
+            # 6. Remove o arquivo temporário
+            rm app.tar.gz
+            
+            # 7. Parar e remover containers antigos
+            echo "Parando e removendo containers antigos..."
+            docker compose down 
+            
+            # 8. Reconstruir e rodar os serviços em background
+            # O --build é crucial aqui, pois a imagem será construída na VPS
+            echo "Construindo e iniciando os serviços..."
+            docker compose up -d --build
             
             echo "Deploy concluído!"
-          EOF
