@@ -43,7 +43,7 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    restart: always
+    restart: on-failure
 
   # 3. Serviço da Aplicação Node.js
   app:
