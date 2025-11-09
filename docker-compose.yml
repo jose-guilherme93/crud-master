@@ -38,7 +38,7 @@ services:
       - KEY=${KEY}
       - DATABASE_URL=${DATABASE_URL} # Se for usado em algum lugar
       - USERNAME=${USERNAME} # Se for usado em algum lugar
-    entrypoint: ["/usr/bin/env", "bash", "-c"]
+    entrypoint: []
     command: "pnpm run migrate"
     depends_on:
       postgres:
