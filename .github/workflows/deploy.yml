@@ -31,22 +31,25 @@ jobs:
       # -----------------------------------------------------------------
       # Passo 2: Executa comandos remotos e INJETA os secrets
       # -----------------------------------------------------------------
-      - name: Executar Deploy Remoto Injetando Variáveis
+      - name: Executar Deploy Remoto e Injetar Secrets
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.KEY }}
           port: 22
+          
+          # 1. Define TODAS as variáveis no ambiente do Runner (necessário para o envs)
+        env:
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+          PGHOST: ${{ secrets.PGHOST }}
+          PGPORT: ${{ secrets.PGPORT }}
+          
+          envs: POSTGRES_USER,POSTGRES_PASSWORD,POSTGRES_DB,PGHOST,PGPORT
+          
           script: |
-            # Navega para o diretório
             cd /home/${{ secrets.USERNAME }}/node-vps
-        
             docker compose down || true
-            
-            POSTGRES_USER=${{ secrets.POSTGRES_USER }} \
-            POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} \
-            POSTGRES_DB=${{ secrets.POSTGRES_DB }} \
-            PGHOST=${{ secrets.PGHOST }} \
-            PGPORT=${{ secrets.PGPORT }} \
             docker compose up -d --build
