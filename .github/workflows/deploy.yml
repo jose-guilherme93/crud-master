@@ -25,8 +25,8 @@ jobs:
       USERNAME: ${{ secrets.USERNAME }}
       
       # Variáveis de Conexão SSH (VPS)
-      SSH_HOST: ${{ secrets.SSH_HOST }}
-      SSH_USER: ${{ secrets.SSH_USER }}
+      SSH_HOST: ${{ secrets.HOST }}
+      SSH_USER: ${{ secrets.USERNAME }}
 
     steps:
       - name: ⬇️ Checkout do Código
