@@ -10,7 +10,7 @@ import reviewsRoutes from './routes/reviewsRoutes.js'
 import authRoutes from './routes/authRoutes.js'
 
 const app = express()
-const PORT = process.env.SERVER_PORT || 3000
+const PORT = Number(process.env.SERVER_PORT) || 3000
 
 app.use(express.json())
 
@@ -26,7 +26,7 @@ app.use((req, res) => {
   res.status(404).json({ message: `Rota não encontrada ${req.originalUrl}` })
 })
 
-app.listen(PORT, () => {
+app.listen(PORT, "0.0.0.0" , () => {
     console.info("server is running",)
 
 })
