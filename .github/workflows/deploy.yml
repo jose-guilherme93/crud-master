@@ -1,4 +1,4 @@
-name: Deploy to VPS via SCP
+name: Deploy to VPS via SSH
 
 on:
   push:
@@ -7,24 +7,16 @@ on:
 
 jobs:
   deploy:
-    name: Copiar e iniciar projeto na VPS
+    name: Copiar, Injetar Secrets e Iniciar Projeto na VPS
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout do código
         uses: actions/checkout@v3
 
-      - name: Criar .env na VPS via SSH
-        uses: appleboy/ssh-action@v1
-        with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.KEY }}
-          port: 22
-          script: |
-            echo "${{ secrets.ENV_FILE_DB }}" > /home/${{ secrets.USERNAME }}/node-vps/.env.db
-            echo "${{ secrets.ENV_FILE }}" > /home/${{ secrets.USERNAME }}/node-vps/.env
-
+      # -----------------------------------------------------------------
+      # Passo 1: O SCP envia o código, o docker-compose.yml e o Dockerfile
+      # -----------------------------------------------------------------
       - name: Copy files via SCP
         uses: appleboy/scp-action@v1
         with:
@@ -32,10 +24,14 @@ jobs:
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.KEY }}
           port: 22
+          # Garante que todos os arquivos necessários para o build Docker sejam enviados.
           source: "."
           target: "/home/${{ secrets.USERNAME }}/node-vps"
 
-      - name: Executar comandos remotos via SSH
+      # -----------------------------------------------------------------
+      # Passo 2: Executa comandos remotos e INJETA os secrets
+      # -----------------------------------------------------------------
+      - name: Executar Deploy Remoto Injetando Variáveis
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.HOST }}
@@ -43,7 +39,14 @@ jobs:
           key: ${{ secrets.KEY }}
           port: 22
           script: |
+            # Navega para o diretório
             cd /home/${{ secrets.USERNAME }}/node-vps
-            docker compose --env-file .env.db up -d postgres
-            docker compose --env-file .env up -d app
+        
+            docker compose down || true
+            
+            POSTGRES_USER=${{ secrets.POSTGRES_USER }} \
+            POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} \
+            POSTGRES_DB=${{ secrets.POSTGRES_DB }} \
+            PGHOST=${{ secrets.PGHOST }} \
+            PGPORT=${{ secrets.PGPORT }} \
             docker compose up -d --build

@@ -1,4 +1,5 @@
 services:
+ services:
   app:
     build:
       context: .
@@ -7,9 +8,10 @@ services:
     restart: always
     ports:
       - "3000:3000"
-    env_file:
-      - .env
     environment:
+      PGHOST: postgres 
+      PGPORT: 5432
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
       NODE_ENV: production
     depends_on:
       - postgres
@@ -18,8 +20,6 @@ services:
     image: postgres:15
     container_name: postgres_crud
     restart: always
-    env_file:
-      - .env.db
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
