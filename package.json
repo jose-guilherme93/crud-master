@@ -9,7 +9,7 @@
     "migrate": "node  dist/scripts/exec-migrations.js",
     "generate:tests": "node generate-tests.js",
     "dev": "pnpm exec tsx watch src/server.ts",
-    "build": "tsc && tsc-alias && cp -R src/migrations dist/migrations"
+    "build": "tsc && tsc-alias && mkdir -p dist/migrations && cp -R src/migrations dist/migrations"
   },
   "keywords": [],
   "type": "module",
