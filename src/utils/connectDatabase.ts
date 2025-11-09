@@ -1,7 +1,7 @@
 import { configDotenv } from "dotenv";
 configDotenv()
 import { Pool } from "pg"
-import { logger } from "../scripts/logger.js";
+import { logger } from "../scripts/logger.ts";
 
 export const pool = new Pool({
     connectionString: process.env.DATABASE_URL
