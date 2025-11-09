@@ -14,9 +14,9 @@ const __dirname = path.dirname(__filename)
 const client = new Client({
   host: process.env.PGHOST,
   port: process.env.PGPORT ? parseInt(process.env.PGPORT) : undefined,
-  database: process.env.POSTGRESDB,
-  user: process.env.POSTGRESUSER,
-  password: process.env.PGPASSWORD,
+  database: process.env.POSTGRES_DB,
+  user: process.env.POSTGRES_USER,
+  password: process.env.POSTGRES_PASSWORD,
 })
 
 async function ensureMigrationsTable() {
