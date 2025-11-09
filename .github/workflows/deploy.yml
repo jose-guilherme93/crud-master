@@ -30,7 +30,7 @@ jobs:
       # -----------------------------------------------------------------
       # Passo 2: Executa comandos remotos e INJETA os secrets
       # -----------------------------------------------------------------
-      - name: Executar Deploy Remoto e INJETAR Secrets
+      - name: Executar Deploy Remoto e Injetar Secrets
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.HOST }}
@@ -38,16 +38,20 @@ jobs:
           key: ${{ secrets.KEY }}
           port: 22
           
-          # INJEÇÃO FORÇADA: Usamos o prefixo em linha única, que é o mais robusto.
+          # 1. Define TODAS as variáveis no ambiente do Runner (essencial para o envs)
+        env:
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+          PGHOST: ${{ secrets.PGHOST }}
+          PGPORT: ${{ secrets.PGPORT }}
+            
+          # 2. CRUCIAL: Lista TODAS as variáveis (incluindo HOST/PORT) para exportação remota.
+          envs: POSTGRES_USER,POSTGRES_PASSWORD,POSTGRES_DB,PGHOST,PGPORT
+          
           script: |
             cd /home/${{ secrets.USERNAME }}/node-vps
             docker compose down || true
             
-            # --- INJEÇÃO DE VARIÁVEIS NA LINHA DE COMANDO ---
-            # Resolve o problema de exportação do shell e garante que o docker-compose receba os valores.
-            POSTGRES_USER="${{ secrets.POSTGRES_USER }}" \
-            POSTGRES_PASSWORD="${{ secrets.POSTGRES_PASSWORD }}" \
-            POSTGRES_DB="${{ secrets.POSTGRES_DB }}" \
-            PGHOST="${{ secrets.PGHOST }}" \
-            PGPORT="${{ secrets.PGPORT }}" \
+            # Comando limpo: as variáveis já estarão exportadas pelo ssh-action
             docker compose up -d --build
