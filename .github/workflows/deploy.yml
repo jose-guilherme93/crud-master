@@ -1,154 +1,74 @@
-name: CI/CD Pipeline - Build, Test e Deploy
+name: 🚀 Deploy na VPS (Docker Compose)
 
 on:
   push:
     branches:
       - main
-  pull_request:
-    branches:
-      - main
+  workflow_dispatch: # Permite rodar manualmente
 
 jobs:
-  check:
-    name: 🧪 Lint e Testes Unitários
+  deploy:
     runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout do repositório
-        uses: actions/checkout@v4
-
-      - name: Configurar Node.js 20
-        uses: actions/setup-node@v4
-        with:
-          node-version: 24
-
-      - name: Configurar pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 8
-
-      - name: Habilitar cache de dependências
-        uses: actions/cache@v4
-        with:
-          path: ~/.pnpm-store
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-
-      - name: Instalar dependências
-        run: pnpm install --frozen-lockfile
-
-
-  integration-test:
-    name: 🐳 Testes de Integração (Docker)
-    runs-on: ubuntu-latest
-    needs: check
-
+    
+    # Define as variáveis de ambiente que serão usadas em TODOS os passos
+    # Elas são mapeadas das Secrets do seu repositório
     env:
+      # Variáveis do Postgres (DB Secrets)
+      POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
       POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
       POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-      POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
-      JWT_SECRET: ${{ secrets.JWT_SECRET }}
-      HOST_DATABASE_URL: postgresql://${{ secrets.POSTGRES_USER }}:${{ secrets.POSTGRES_PASSWORD }}@localhost:5432/${{ secrets.POSTGRES_DB }}
-      CONTAINER_DATABASE_URL: postgresql://${{ secrets.POSTGRES_USER }}:${{ secrets.POSTGRES_PASSWORD }}@postgres:5432/${{ secrets.POSTGRES_DB }}
+      # Variáveis de Conexão e Aplicação (App Secrets)
+      PGPORT: ${{ secrets.PGPORT }}
+      HOST: ${{ secrets.HOST }}
+      KEY: ${{ secrets.KEY }}
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      USERNAME: ${{ secrets.USERNAME }}
+      
+      # Variáveis de Conexão SSH (VPS)
+      SSH_HOST: ${{ secrets.SSH_HOST }}
+      SSH_USER: ${{ secrets.SSH_USER }}
 
     steps:
-      - name: Checkout do repositório
+      - name: ⬇️ Checkout do Código
         uses: actions/checkout@v4
 
-      - name: Configurar Node.js 20
-        uses: actions/setup-node@v4
+      - name: 🔑 Configurar Chave SSH Privada
+        uses: webfactory/ssh-agent@v0.9.0
         with:
-          node-version: 20
+          # Sua chave SSH privada para acessar a VPS
+          ssh-private-key: ${{ secrets.SSH_KEY_PRIVATE }}
 
-      - name: Configurar pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 8
-
-      - name: Habilitar cache de dependências
-        uses: actions/cache@v4
-        with:
-          path: ~/.pnpm-store
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-
-      - name: Instalar dependências (para o runner)
-        run: pnpm install --frozen-lockfile
-
-      - name: Criar .env para docker-compose
+      - name: 🚀 Executar Deploy via SSH
+        # O comando SSH se conecta na VPS e executa os comandos de deploy
+        # O GitHub Actions já injetou as 'env' (secrets) no ambiente deste job,
+        # portanto, o SSH pode passá-las adiante.
         run: |
-          echo "POSTGRES_USER=${{ env.POSTGRES_USER }}" > .env
-          echo "POSTGRES_PASSWORD=${{ env.POSTGRES_PASSWORD }}" >> .env
-          echo "POSTGRES_DB=${{ env.POSTGRES_DB }}" >> .env
-          echo "JWT_SECRET=${{ env.JWT_SECRET }}" >> .env
-          echo "DATABASE_URL=${{ env.CONTAINER_DATABASE_URL }}" >> .env
-          echo "PGHOST=postgres" >> .env
-          echo "PGPORT=5432" >> .env
-
-      - name: Buildar e iniciar serviços (Docker Compose)
-        run: docker-compose up -d --build
-
-      - name: Aguardar PostgreSQL ficar pronto
-        run: |
-          until docker-compose exec postgres pg_isready -U ${{ env.POSTGRES_USER }} -d ${{ env.POSTGRES_DB }}; do
-            sleep 2
-          done
-
-      - name: Aguardar aplicação (e migrações)
-        run: |
-          until [ "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/health)" -eq 200 ]; do
-            sleep 5
-          done
-
-      - name: Executar Testes de Integração
-        run: pnpm run test:integration
-        env:
-          DATABASE_URL: ${{ env.HOST_DATABASE_URL }}
-          JWT_SECRET: ${{ env.JWT_SECRET }}
-          NODE_ENV: test
-
-      - name: Parar serviços (Cleanup)
-        if: always()
-        run: docker-compose down
-
-  build-and-push:
-    name: 🚀 Buildar e Publicar Imagem
-    runs-on: ubuntu-latest
-    needs: integration-test
-    if: github.ref == 'refs/heads/main'
-
-    steps:
-      - name: Checkout do repositório
-        uses: actions/checkout@v4
-
-      - name: Configurar Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Login no GitHub Container Registry (GHCR)
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Extrair metadados (tags) da imagem
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ghcr.io/${{ github.repository }}
-          tags: |
-            type=sha,prefix=,format=short
-            type=raw,value=latest,enable={{is_default_branch}}
-
-      - name: Buildar e enviar imagem
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: ./Dockerfile
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          # 1. Conecta-se à VPS
+          ssh -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST << EOF
+            # 2. Navega para o diretório do projeto na VPS
+            cd /caminho/para/seu/projeto
+            
+            # 3. Puxa a última versão do código (necessário para o docker-compose build)
+            git pull origin main
+            
+            # 4. Executa o Docker Compose. 
+            # O '-d' roda em background, o '--build' reconstrói a imagem Node
+            # As variáveis de ambiente exportadas pelo GitHub Actions (env:)
+            # são herdadas e usadas pelo docker-compose.yml (sintaxe ${VARIAVEL})
+            
+            # Exporte todas as variáveis antes de rodar o docker-compose
+            export POSTGRES_DB='$POSTGRES_DB'
+            export POSTGRES_USER='$POSTGRES_USER'
+            export POSTGRES_PASSWORD='$POSTGRES_PASSWORD'
+            export PGPORT='$PGPORT'
+            export HOST='$HOST'
+            export KEY='$KEY'
+            export DATABASE_URL='$DATABASE_URL'
+            export USERNAME='$USERNAME'
+            
+            # Agora executa a orquestração
+            docker-compose up -d --build
+            
+            # Exibe o status da orquestração para debug (Opcional, mas útil)
+            docker-compose ps
+          EOF
