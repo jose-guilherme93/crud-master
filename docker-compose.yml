@@ -39,7 +39,7 @@ services:
       - DATABASE_URL=${DATABASE_URL} # Se for usado em algum lugar
       - USERNAME=${USERNAME} # Se for usado em algum lugar
     entrypoint: []
-    command: "pnpm run migrate"
+    command: ["pnpm", "run", "migrate"]
     depends_on:
       postgres:
         condition: service_healthy
