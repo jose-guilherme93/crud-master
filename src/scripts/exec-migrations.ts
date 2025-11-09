@@ -1,6 +1,5 @@
 
-import { configDotenv } from "dotenv";
-configDotenv()
+
 import { Client } from "pg"
 import fs from "node:fs";
 import path from "node:path"
