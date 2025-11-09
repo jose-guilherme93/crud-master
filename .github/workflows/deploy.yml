@@ -1,74 +1,77 @@
-name: 🚀 Deploy na VPS (Docker Compose)
+# .github/workflows/deploy.yml
+
+name: CD - Deploy Rápido para VPS
 
 on:
   push:
     branches:
-      - main
-  workflow_dispatch: # Permite rodar manualmente
+      - main # Dispara o deploy no push para a branch principal
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    
-    # Define as variáveis de ambiente que serão usadas em TODOS os passos
-    # Elas são mapeadas das Secrets do seu repositório
-    env:
-      # Variáveis do Postgres (DB Secrets)
-      POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
-      POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
-      POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-      # Variáveis de Conexão e Aplicação (App Secrets)
-      PGPORT: ${{ secrets.PGPORT }}
-      HOST: ${{ secrets.HOST }}
-      KEY: ${{ secrets.KEY }}
-      DATABASE_URL: ${{ secrets.DATABASE_URL }}
-      USERNAME: ${{ secrets.USERNAME }}
-      
-      # Variáveis de Conexão SSH (VPS)
-      SSH_HOST: ${{ secrets.HOST }}
-      SSH_USER: ${{ secrets.USERNAME }}
+   
 
     steps:
-      - name: ⬇️ Checkout do Código
+      - name: ⬇️ Checkout do Repositório
         uses: actions/checkout@v4
 
-      - name: 🔑 Configurar Chave SSH Privada
+      - name: 🔑 Configurar Acesso SSH com Chave Privada
+        # Injeta a chave SSH no agente do runner para SCP e SSH.
         uses: webfactory/ssh-agent@v0.9.0
         with:
-          # Sua chave SSH privada para acessar a VPS
-          ssh-private-key: ${{ secrets.KEY }}
+          ssh-private-key: ${{ secrets.KEY}}
 
-      - name: 🚀 Executar Deploy via SSH
-        # O comando SSH se conecta na VPS e executa os comandos de deploy
-        # O GitHub Actions já injetou as 'env' (secrets) no ambiente deste job,
-        # portanto, o SSH pode passá-las adiante.
+      - name: 📦 Enviar Arquivos com SCP
+        # Copia todos os arquivos e pastas necessários para o build e compose da VPS.
+        # Ajuste a lista de arquivos/pastas conforme a estrutura real do seu projeto.
         run: |
-          # 1. Conecta-se à VPS
-          ssh -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST << EOF
-            # 2. Navega para o diretório do projeto na VPS
-            cd /caminho/para/seu/projeto
+          REMOTE_DIR=/var/www/gamecatalog
+          SSH_USER=${{ secrets.USERNAME }}
+          HOST=${{ secrets.HOST }}
+          
+          # Cria o diretório remoto se não existir, ignorando erros se já existir
+          ssh -o StrictHostKeyChecking=no $SSH_USER@$HOST "mkdir -p $REMOTE_DIR"
+
+          echo "Iniciando cópia dos arquivos..."
+          
+          # Lista de arquivos/pastas a serem copiados (EXEMPLO)
+          # Você deve incluir tudo que o Dockerfile e docker-compose precisam:
+          FILES_TO_COPY="./docker-compose.yml ./Dockerfile ./src ./package.json ./pnpm-lock.yaml" 
+          
+          # Cópia usando SCP
+          scp -r -o StrictHostKeyChecking=no $FILES_TO_COPY $SSH_USER@$HOST:$REMOTE_DIR/
+          echo "Cópia concluída via SCP."
+
+      - name: ⚙️ Executar Deploy Remoto (Build & Up)
+        # Conecta-se à VPS via SSH e executa o Docker Compose Up,
+        # injetando todas as secrets como variáveis de ambiente para o compose.
+        run: |
+          REMOTE_DIR=/var/www/gamecatalog
+          SSH_USER=${{ secrets.USERNAME }}
+          HOST=${{ secrets.HOST }}
+          
+          # Conecta via SSH e executa os comandos
+          ssh -o StrictHostKeyChecking=no $SSH_USER@$HOST << 'EOF'
             
-            # 3. Puxa a última versão do código (necessário para o docker-compose build)
-            git pull origin main
+            # Navega para o diretório de deploy
+            cd $REMOTE_DIR
+
+            echo "Injetando .env e reiniciando serviços..."
+
+            # 🚀 INJEÇÃO RÁPIDA DE SECRETS DIRETAMENTE NO COMANDO DOCKER COMPOSE
+            # Isso garante que o docker-compose lendo "${VAR}" no arquivo yaml
+            # encontre o valor no ambiente.
             
-            # 4. Executa o Docker Compose. 
-            # O '-d' roda em background, o '--build' reconstrói a imagem Node
-            # As variáveis de ambiente exportadas pelo GitHub Actions (env:)
-            # são herdadas e usadas pelo docker-compose.yml (sintaxe ${VARIAVEL})
+            POSTGRES_DB="${{ secrets.POSTGRES_DB }}" \
+            POSTGRES_USER="${{ secrets.POSTGRES_USER }}" \
+            POSTGRES_PASSWORD="${{ secrets.POSTGRES_PASSWORD }}" \
+            PGPORT="${{ secrets.PGPORT }}" \
+            HOST="${{ secrets.HOST }}" \
+            KEY="${{ secrets.KEY }}" \
+            DATABASE_URL="${{ secrets.DATABASE_URL }}" \
+            USERNAME="${{ secrets.USERNAME }}" \
+            docker compose up -d --build --force-recreate
             
-            # Exporte todas as variáveis antes de rodar o docker-compose
-            export POSTGRES_DB='$POSTGRES_DB'
-            export POSTGRES_USER='$POSTGRES_USER'
-            export POSTGRES_PASSWORD='$POSTGRES_PASSWORD'
-            export PGPORT='$PGPORT'
-            export HOST='$HOST'
-            export KEY='$KEY'
-            export DATABASE_URL='$DATABASE_URL'
-            export USERNAME='$USERNAME'
-            
-            # Agora executa a orquestração
-            docker-compose up -d --build
-            
-            # Exibe o status da orquestração para debug (Opcional, mas útil)
-            docker-compose ps
+            echo "Deploy concluído!"
           EOF
