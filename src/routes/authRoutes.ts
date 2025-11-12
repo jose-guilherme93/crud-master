@@ -9,6 +9,6 @@ const router: Router = express.Router()
 
 router.post("/login", loginController)
 router.post("/recovery", recoveryController)
-router.post("/reset-password/", resetPasswordController)
+router.post("/reset-password", resetPasswordController)
 
 export default router

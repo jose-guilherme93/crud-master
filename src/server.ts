@@ -14,7 +14,10 @@ const PORT = Number(process.env.SERVER_PORT) || 3000
 
 app.use(express.json())
 
-app.get("/", (req, res) => res.status(200).json({message: "Gamecatalog API"}))
+app.get("/", (req, res) => res.status(200).json({
+  message: "Gamecatalog API",
+  version: "v0.1"
+}))
 app.get("/health", (req, res) => res.status(200).json({message: "Server UP"}))
 
 app.use("/auth", authRoutes)

@@ -2,18 +2,18 @@
   "name": "gamecatalog",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
-    "test": "node --env-file=.env ./node_modules/vitest/vitest.mjs",
+    "test": "node ./node_modules/vitest/vitest.mjs",
     "start": "node dist/server.js",
-    "migrate": "node  dist/scripts/exec-migrations.js",
+    "migrate": "node dist/scripts/exec-migrations.js",
     "generate:tests": "node generate-tests.js",
     "dev": "pnpm exec tsx watch src/server.ts",
     "build": "tsc && tsc-alias && mkdir -p dist/migrations && cp -R src/migrations dist/migrations"
   },
   "keywords": [],
   "type": "module",
-  "author": "",
+  "author": "Joseti",
   "license": "ISC",
   "packageManager": "pnpm@10.18.3",
   "dependencies": {

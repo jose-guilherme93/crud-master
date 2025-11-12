@@ -1,5 +1,4 @@
-import { configDotenv } from "dotenv";
-configDotenv()
+
 import { Pool } from "pg"
 import { logger } from "../scripts/logger.ts";
 
