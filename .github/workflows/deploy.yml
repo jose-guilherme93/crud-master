@@ -68,7 +68,6 @@ jobs:
             source "$NVM_DIR/nvm.sh"
 
             # 2. Exportação das variáveis de ambiente para o Docker Compose
-            # Estas variáveis serão acessíveis pelo ${VARIAVEL} no docker-compose.yml
             export POSTGRES_DB="${{ env.POSTGRES_DB }}"
             export POSTGRES_USER="${{ env.POSTGRES_USER }}"
             export POSTGRES_PASSWORD="${{ env.POSTGRES_PASSWORD }}"

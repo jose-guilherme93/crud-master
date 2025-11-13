@@ -1,5 +1,5 @@
 
-import { pool } from '../utils/connectDatabase.ts'
+import { pool } from '../utils/connectDatabase.js'
 import { randomUUID } from 'crypto'
 
 

@@ -1,11 +1,10 @@
 
 services:
-  # 1. Serviço do Banco de Dados Postgres
+ 
   postgres:
     image: postgres:15-alpine
-    container_name: sua_app_postgres
+    container_name: gamecatalog_postgres
     restart: always
-    # Variáveis injetadas pelo CI/CD ou Shell da VPS
     environment:
       - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_USER=${POSTGRES_USER}
@@ -20,45 +19,40 @@ services:
       timeout: 5s
       retries: 5
       start_period: 10s
-
-  # 2. Serviço para rodar as Migrations
   migrations:
     build: .
-    container_name: sua_app_migrations
-    # Variáveis de conexão com o banco e outras secrets
+    container_name: gamecatalog_migrations
+   
     environment:
-      # Variáveis de Conexão com o Postgres (host é o nome do serviço)
       - PGHOST=postgres
       - PGPORT=${PGPORT}
       - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      # Outras secrets
+      
       - HOST=${HOST}
       - KEY=${KEY}
-      - DATABASE_URL=${DATABASE_URL} # Se for usado em algum lugar
-      - USERNAME=${USERNAME} # Se for usado em algum lugar
+      - DATABASE_URL=${DATABASE_URL} 
+      - USERNAME=${USERNAME} 
     entrypoint: []
     command: ["pnpm", "run", "migrate"]
     depends_on:
       postgres:
         condition: service_healthy
     restart: on-failure
-
-  # 3. Serviço da Aplicação Node.js
   app:
     build: .
-    container_name: sua_app_node
+    container_name: gamecatalog_app
     restart: always
-    # Variáveis de Conexão com o banco e outras secrets
+    
     environment:
-      # Variáveis de Conexão com o Postgres (host é o nome do serviço)
+      
       - PGHOST=postgres
       - PGPORT=${PGPORT}
       - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      # Outras secrets
+      
       - HOST=${HOST}
       - KEY=${KEY}
       - DATABASE_URL=${DATABASE_URL}
