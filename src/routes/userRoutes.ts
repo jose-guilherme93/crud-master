@@ -1,12 +1,12 @@
 import express, {Router} from 'express'
 import { 
-    getUserByIdController,
-    createUserController,
-    deleteUserController,
-    updateUserByIdController,
-    getAllUsers,
-    getSessionByIdController
-     } from '../controllers/userController.js'
+  getUserByIdController,
+  createUserController,
+  deleteUserController,
+  updateUserByIdController,
+  getAllUsers,
+  getSessionByIdController
+} from '../controllers/userController.js'
 
 
 const router: Router = express.Router()

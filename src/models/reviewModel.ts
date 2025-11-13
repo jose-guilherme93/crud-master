@@ -1,5 +1,5 @@
 
-import { pool } from "../utils/connectDatabase.js"
+import { pool } from '../utils/connectDatabase.js'
 
 
 interface ReviewParams {
@@ -23,7 +23,7 @@ export async function createReviewDB(params: ReviewParams): Promise<Review> {
     INSERT INTO reviews (user_id, game_id, score, review_text)
     VALUES ($1, $2, $3, $4)
     RETURNING *;
-  `;
+  `
 
   const {user_id, game_id, score, review_text} = params
 
@@ -31,7 +31,7 @@ export async function createReviewDB(params: ReviewParams): Promise<Review> {
     const response = await pool.query(query, [user_id, game_id, score, review_text])
     return response.rows[0]
   } catch (error) {
-    console.error("Erro ao criar review:", error)
+    console.error('Erro ao criar review:', error)
     throw error
   }
 }

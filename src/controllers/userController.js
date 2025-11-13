@@ -1,7 +1,7 @@
 import { logger } from "@/scripts/logger.js"
 import { checkUser, createUserDB, deleteUserDB, getAllUsersDB, getSessionByIdDb, getUserByID, updateUserDB } from "../models/userModel.js"
 import * as z from 'zod'
-
+import { randomUUID } from "node:crypto"
 export const getAllUsers = async (req, res) => { 
     try {
         const getUsers = await getAllUsersDB()
@@ -9,7 +9,7 @@ export const getAllUsers = async (req, res) => {
         res.status(200).json({getUsers})
         
     } catch(error) {
-        console.log(error)
+        logger.info(error)
     }
 
 }
@@ -20,7 +20,7 @@ export const createUserController = async (req, res) => {
     const {username, email, password_hash, avatar} = req.body
 
     const newUser = {
-      id: crypto.randomUUID(),
+      id: randomUUID(),
       username,
       email,
       password_hash,
@@ -33,10 +33,10 @@ export const createUserController = async (req, res) => {
     else {
         
         try {
-            const id = crypto.randomUUID()
+            const id = randomUUID()
             
             const user = await createUserDB(newUser)
-            console.log(user)
+            logger.info(user)
             res.status(201).json(user)
         }
         catch (error) {
@@ -79,7 +79,7 @@ export const updateUserByIdController = async (req, res) => {
     
     updateUserFromUser["updated_at"] = timestamp
 
-    console.log("🚀 ~ updateUserByIdController ~ updateUserFromUser:", updateUserFromUser)
+    logger.info("🚀 ~ updateUserByIdController ~ updateUserFromUser:", updateUserFromUser)
     
 
     try {

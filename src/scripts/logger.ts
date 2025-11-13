@@ -1,6 +1,6 @@
 import { createLogger, format, transports } from 'winston'
 
-const { combine, timestamp, printf } = format;
+const { combine, timestamp, printf } = format
 
 const customFormat = printf(info => {
   const icons = {
@@ -8,9 +8,9 @@ const customFormat = printf(info => {
     warn: '⚠️',
     error: '❌',
     debug: '🐛'
-  };
+  }
   return `${info.timestamp} ${icons[info.level as keyof typeof icons] || ''} [${info.level.toUpperCase()}]: ${info.message}`
-});
+})
 
 export const logger = createLogger({
   level: 'info',
@@ -22,5 +22,5 @@ export const logger = createLogger({
     new transports.Console(),
     new transports.File({ filename: 'app.log' })
   ]
-});
+})
 

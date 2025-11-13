@@ -28,7 +28,7 @@ const seed = async () => {
           `senha_hash_${i}`,
           `https://example.com/avatar${i}.png`,
         ]
-      );
+      )
     }
 
     console.log('🎮 Inserindo 500 jogos...')
@@ -48,7 +48,7 @@ const seed = async () => {
           `https://example.com/cover${i}.jpg`,
           `jogo-${i}`,
         ]
-      );
+      )
       gameIds.push(result.rows[0].id)
     }
 
@@ -63,15 +63,15 @@ const seed = async () => {
           `Review do usuário ${i + 1} para o jogo ${i + 1}`,
           (Math.random() * 10).toFixed(1),
         ]
-      );
+      )
     }
 
     console.log('✅ Seed finalizado com sucesso!')
     pool.end()
   } catch (err) {
     console.error('❌ Erro ao rodar seed:', err)
-    pool.end();
+    pool.end()
   }
-};
+}
 
-seed();
+seed()

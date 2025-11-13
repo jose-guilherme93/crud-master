@@ -1,17 +1,17 @@
 
-import { Pool } from "pg"
-import { logger } from "../scripts/logger.js";
+import { Pool } from 'pg'
+import { logger } from '../scripts/logger.js'
 
 export const pool = new Pool({
-    connectionString: process.env.DATABASE_URL
+  connectionString: process.env.DATABASE_URL
 })
 
 // Loga quando a conexão é estabelecida
 pool.on('connect', () => {
-  logger.info('Database connected');
-});
+  logger.info('Database connected')
+})
 
 
 pool.on('error', (err) => {
-  logger.error(`🔴 error on connect to database: ${err.message}`);
-});
+  logger.error(`🔴 error on connect to database: ${err.message}`)
+})

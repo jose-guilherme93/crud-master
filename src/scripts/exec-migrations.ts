@@ -1,10 +1,11 @@
 
-import { configDotenv } from "dotenv";
+import { configDotenv } from 'dotenv'
 configDotenv()
-import { Client } from "pg"
-import fs from "node:fs";
-import path from "node:path"
-import { fileURLToPath } from "node:url"
+import { Client } from 'pg'
+import fs from 'node:fs'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { logger } from './logger.js'
 
 
 const __filename = fileURLToPath(import.meta.url)
@@ -29,8 +30,8 @@ async function ensureMigrationsTable() {
 }
 
 async function getExecutedMigrations() {
-  const res = await client.query("SELECT name FROM migrations")
-  return res.rows.map((r) => r.name);
+  const res = await client.query('SELECT name FROM migrations')
+  return res.rows.map((r) => r.name)
 }
 
 async function runMigrations() {
@@ -39,38 +40,38 @@ async function runMigrations() {
 
     await ensureMigrationsTable()
 
-    const migrationsDir = path.join(__dirname, "../migrations")
+    const migrationsDir = path.join(__dirname, '../migrations')
     const files = fs
       .readdirSync(migrationsDir)
-      .filter((f) => f.endsWith(".sql"))
+      .filter((f) => f.endsWith('.sql'))
 
-    const executedMigrations = await getExecutedMigrations();
+    const executedMigrations = await getExecutedMigrations()
 
     for (const file of files) {
       if (executedMigrations.includes(file)) {
-        console.log(`Skipping already executed migration: ${file}`)
-        continue;
+        logger.info(`Skipping already executed migration: ${file}`)
+        continue
       }
 
       const filePath = path.join(migrationsDir, file)
-      const sql = fs.readFileSync(filePath, "utf-8")
+      const sql = fs.readFileSync(filePath, 'utf-8')
 
       try {
-        await client.query(sql);
-        await client.query("INSERT INTO migrations(name) VALUES($1)", [file])
-        console.log(`Migration executed: ${file}`)
+        await client.query(sql)
+        await client.query('INSERT INTO migrations(name) VALUES($1)', [file])
+        logger.info(`Migration executed: ${file}`)
       } catch (err) {
         console.error(`Error running migration ${file}:`, err)
         process.exit(1)
       }
     }
 
-    console.log("All migrations executed!")
+    logger.info('All migrations executed!')
   } catch (err) {
-    console.error("Erro ao conectar ou executar migrations:", err)
+    console.error('Erro ao conectar ou executar migrations:', err)
   } finally {
     await client.end()
-    console.log("Conexão encerrada")
+    logger.info('Conexão encerrada')
   }
 }
 

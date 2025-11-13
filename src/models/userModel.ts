@@ -10,7 +10,7 @@ const checkUserSchema = z.object({
 type checkUser = z.infer<typeof checkUserSchema>
 
 export const checkUser = async (userData: checkUser) => {
-  const ifUserExistsQuery = `SELECT * FROM USERS WHERE username = $1 OR email = $2`
+  const ifUserExistsQuery = 'SELECT * FROM USERS WHERE username = $1 OR email = $2'
   const checkResult = await pool.query(ifUserExistsQuery,[userData.username, userData.email])
   return checkResult.rows
 }
@@ -38,13 +38,13 @@ export const createUserDB = async (newUser: NewUser): Promise<NewUser> => {
     VALUES ($1, $2, $3, $4, $5)
     RETURNING *;
     `
-    const result = await pool.query(query, [id, username, email, password_hash, avatar])
-    return result.rows[0]
+  const result = await pool.query(query, [id, username, email, password_hash, avatar])
+  return result.rows[0]
 }
 
 
 export const deleteUserDB = async (id: string) => {
-  const query = `UPDATE users SET deleted_at = NOW() WHERE id = $1 RETURNING deleted_at;`
+  const query = 'UPDATE users SET deleted_at = NOW() WHERE id = $1 RETURNING deleted_at;'
   const responseQuery = await pool.query(query, [id])
 
   return responseQuery
@@ -60,7 +60,7 @@ export const updateUserDB = async (id: string, userData: UpdateUserData) => {
   const values = Object.values(userData)
   const setString = keys
     .map((key, index) => `${key} = $${index + 1}`)
-    .join(', ');
+    .join(', ')
     
   const query = `UPDATE users SET ${setString} WHERE id = $${keys.length + 1}  RETURNING *;
   `
@@ -72,23 +72,23 @@ export const updateUserDB = async (id: string, userData: UpdateUserData) => {
   
 
 export const getUserByID = async (id: string) => {
-    const query = `SELECT * from users WHERE id = $1;`
-    const responseQuery = await pool.query(query, [id])
+  const query = 'SELECT * from users WHERE id = $1;'
+  const responseQuery = await pool.query(query, [id])
 
-    return responseQuery
+  return responseQuery
 }
 
 export const getAllUsersDB = async () => {
-  const query = `SELECT * FROM users ORDER BY id ASC LIMIT 50 OFFSET 0;`
+  const query = 'SELECT * FROM users ORDER BY id ASC LIMIT 50 OFFSET 0;'
   const responseQuery = pool.query(query)
 
   return responseQuery
 }
  
- export const getSessionByIdDb = async (id: string) => {
+export const getSessionByIdDb = async (id: string) => {
 
-    const query = `SELECT * FROM sessions WHERE user_id = $1`
-    const responseQuery = await pool.query(query, [id])
-    return responseQuery
+  const query = 'SELECT * FROM sessions WHERE user_id = $1'
+  const responseQuery = await pool.query(query, [id])
+  return responseQuery
   
 }
