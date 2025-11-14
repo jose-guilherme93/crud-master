@@ -1,36 +1,28 @@
+import type { User } from '@/types/user.js'
 import { pool } from '@/utils/connectDatabase.js'
-import {z} from 'zod'
-
+import { z } from 'zod'
 
 const checkUserSchema = z.object({
-  username: z.string(),
-  email: z.email()
+  email: z.email(),
 })
 
-type checkUser = z.infer<typeof checkUserSchema>
+type checkUserType = z.infer<typeof checkUserSchema>
 
-export const checkUser = async (userData: checkUser) => {
-  const ifUserExistsQuery = 'SELECT * FROM USERS WHERE username = $1 OR email = $2'
-  const checkResult = await pool.query(ifUserExistsQuery,[userData.username, userData.email])
+export const checkUser = async (userData: checkUserType) => {
+  checkUserSchema.parse(userData.email)
+  const ifUserExistsQuery = 'SELECT * FROM USERS WHERE email = $1'
+  const checkResult = await pool.query(ifUserExistsQuery, [userData.email])
   return checkResult.rows
 }
 
-interface NewUser {
-  id: string;
-  username: string;
-  email: string;
-  password_hash: string;
-  avatar: string;
-}
- 
-export const createUserDB = async (newUser: NewUser): Promise<NewUser> => {
+export const createUserDB = async (newUser: User) => {
 
   const {
     id,
     username,
     email,
     password_hash,
-    avatar
+    avatar,
 
   } = newUser
 
@@ -42,14 +34,12 @@ export const createUserDB = async (newUser: NewUser): Promise<NewUser> => {
   return result.rows[0]
 }
 
-
 export const deleteUserDB = async (id: string) => {
   const query = 'UPDATE users SET deleted_at = NOW() WHERE id = $1 RETURNING deleted_at;'
   const responseQuery = await pool.query(query, [id])
 
   return responseQuery
 }
-
 
 interface UpdateUserData {
   [key: string]: string
@@ -61,7 +51,7 @@ export const updateUserDB = async (id: string, userData: UpdateUserData) => {
   const setString = keys
     .map((key, index) => `${key} = $${index + 1}`)
     .join(', ')
-    
+
   const query = `UPDATE users SET ${setString} WHERE id = $${keys.length + 1}  RETURNING *;
   `
   const params = [...values, id]
@@ -69,7 +59,6 @@ export const updateUserDB = async (id: string, userData: UpdateUserData) => {
 
   return responseQuery
 }
-  
 
 export const getUserByID = async (id: string) => {
   const query = 'SELECT * from users WHERE id = $1;'
@@ -84,11 +73,11 @@ export const getAllUsersDB = async () => {
 
   return responseQuery
 }
- 
+
 export const getSessionByIdDb = async (id: string) => {
 
   const query = 'SELECT * FROM sessions WHERE user_id = $1'
   const responseQuery = await pool.query(query, [id])
   return responseQuery
-  
+
 }

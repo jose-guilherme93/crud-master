@@ -65,7 +65,7 @@ export const getAllGamesDB = async (filters: GameFilters = {}): Promise<{ data: 
   }
 }
 
-export const createGame = async (bodyParams: GameCreationParams): Promise<Game> => {
+export const createGame = async (bodyParams: GameCreationParams) => {
   const  {
     title,
     rating,
@@ -99,7 +99,7 @@ export const createGame = async (bodyParams: GameCreationParams): Promise<Game> 
   return responseQuery.rows[0]
 }
 
-export const updateGameDB = async (id: string, updateGameData: UpdateGameData): Promise<QueryResult<Game>> => {
+export const updateGameDB = async (id: string, updateGameData: UpdateGameData) => {
   const keys = Object.keys(updateGameData)
   const values = Object.values(updateGameData)
 

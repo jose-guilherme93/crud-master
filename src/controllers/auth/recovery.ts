@@ -1,4 +1,5 @@
 import { logger } from '../../scripts/logger.js'
+import type { Response, Request } from 'express'
 import * as crypto from 'node:crypto'
 import { createTransport } from 'nodemailer'
 import * as z from 'zod'
@@ -9,19 +10,19 @@ const emailSchema = z.object({
   email: z.email().min(4).max(100),
 })
 
-export const recoveryController = async (req, res) => {
+export const recoveryController = async (req: Request, res: Response) => {
   const { email }  = req.body
   emailSchema.parse({ email })
   logger.info(`try to recovery password with: ${email}`)
   const recoveryToken = crypto.randomBytes(32).toString('hex')
   const responseDbSearch = await searchEmailRegistered(email)
 
-  if(!responseDbSearch.rowCount || responseDbSearch.length === 0) {
+  if(!responseDbSearch.rowCount) {
     logger.warn('email not found')
     return res.status(404).json({ message: 'Email não cadastrado' })
   } else {
 
-    await insertRecoveryTokenInDB(responseDbSearch.rows[0], recoveryToken)
+    await insertRecoveryTokenInDB(responseDbSearch.rows[0]!, recoveryToken)
   }
 
   const transporter = createTransport({
@@ -46,14 +47,14 @@ export const recoveryController = async (req, res) => {
 
     })
 
-    console.log('Message sent:', info.messageId)
+    logger.info('Message sent:', info.messageId)
   }
 
   sendEmail().catch(console.error)
 
   res.status(200).json({
     message: 'email encontrado. inserindo na tabela recovery...',
-    data:  responseDbSearch.fields.email,
+    data: responseDbSearch.rows[0]!.email,
     code: recoveryToken,
   })
 }
