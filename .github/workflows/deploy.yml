@@ -77,7 +77,7 @@ jobs:
             export HOST="${{ env.HOST }}"
             export KEY="${{ env.KEY }}"
             export USERNAME="${{ env.USERNAME }}"
-            export GF_SECURITY_ADMIN_USER$="{{ env.GF_SECURITY_ADMIN_USER }}"
+            export GF_SECURITY_ADMIN_USER="${{ env.GF_SECURITY_ADMIN_USER }}"
             export GF_SECURITY_ADMIN_PASSWORD="${{ env.GF_SECURITY_ADMIN_PASSWORD }}"
             
             # 3. Comandos de Deploy
