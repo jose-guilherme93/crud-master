@@ -95,13 +95,13 @@ jobs:
             
             echo "Run build"
             pnpm run build
-
+            pnpm run migrate
             echo "Removing old images..."
             docker image prune -af
             
             echo "Building and starting new containers..."
             # O Docker Compose usará as variáveis exportadas
-            
+
             docker network create grafana-network || true
             docker compose -f grafana-compose.yml up -d
             docker compose up -d --build

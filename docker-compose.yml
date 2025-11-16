@@ -27,7 +27,7 @@ services:
     
     environment:
       
-      - PGHOST=postgres
+      - PGHOST=${PGHOST}
       - PGPORT=${PGPORT}
       - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_USER=${POSTGRES_USER}

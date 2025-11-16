@@ -15,9 +15,4 @@ while ! nc -z "$PGHOST" "$PGPORT"; do
 done
 echo "Database ready."
 
-echo "running migrations..."
-pnpm run migrate
-echo "migrations done."
-
-
 exec "$@"
