@@ -8,7 +8,7 @@
     "start": "node dist/server.js",
     "migrate": "node dist/scripts/exec-migrations.js",
     "generate:tests": "node generate-tests.js",
-    "dev": "pnpm exec tsx watch src/server.ts",
+    "dev": "pnpm exec tsx watch src/server.ts --dotenv_config_path=.env.development",
     "build": "tsc && tsc-alias && cp -R src/migrations dist/migrations"
   },
   "keywords": [],

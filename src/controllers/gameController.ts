@@ -6,7 +6,7 @@ import type { QueryResult } from 'pg'
 import * as z from 'zod'
 
 const GameParamsSchema = z.object({
-  id: z.string().uuid({ message: 'ID inválido.' }),
+  id: z.string({ message: 'ID inválido.' }),
 })
 
 const CreateGameBodySchema = z.object({

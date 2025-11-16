@@ -2,7 +2,7 @@
 set -e
 
 
-export PGHOST="$PGHOST"
+export PGHOST="postgres"
 export PGPORT="$PGPORT"
 export POSTGRES_USER="$POSTGRES_USER"
 export POSTGRES_PASSWORD="$POSTGRES_PASSWORD"
