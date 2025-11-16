@@ -36,4 +36,4 @@ EXPOSE 3000
 
 ENTRYPOINT [ "/app/docker-entrypoint.sh" ]
 
-CMD [ "pnpm", "start" ]
+CMD [ "pnpm", "start", "0.0.0.0" ]

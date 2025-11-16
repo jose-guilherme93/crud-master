@@ -19,27 +19,7 @@ services:
       timeout: 5s
       retries: 5
       start_period: 10s
-  migrations:
-    build: .
-    container_name: gamecatalog_migrations
-   
-    environment:
-      - PGHOST=postgres
-      - PGPORT=${PGPORT}
-      - POSTGRES_DB=${POSTGRES_DB}
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      
-      - HOST=${HOST}
-      - KEY=${KEY}
-      - DATABASE_URL=${DATABASE_URL} 
-      - USERNAME=${USERNAME} 
-    entrypoint: []
-    command: ["pnpm", "run", "migrate"]
-    depends_on:
-      postgres:
-        condition: service_healthy
-    restart: on-failure
+
   app:
     build: .
     container_name: gamecatalog_app
@@ -52,16 +32,11 @@ services:
       - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      
       - HOST=${HOST}
-      - KEY=${KEY}
       - DATABASE_URL=${DATABASE_URL}
       - USERNAME=${USERNAME}
     ports:
       - "3000:3000"
-    depends_on:
-      migrations:
-        condition: service_completed_successfully
 
 volumes:
   pgdata:

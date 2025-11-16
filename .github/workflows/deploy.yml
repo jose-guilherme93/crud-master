@@ -10,16 +10,21 @@ jobs:
     runs-on: ubuntu-latest
     
     env:
+      #postgres
       POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
       POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
       POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
       PGPORT: ${{ secrets.PGPORT }}
-      
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
-      
+
+      #ssh
       HOST: ${{ secrets.HOST }}
       USERNAME: ${{ secrets.USERNAME }}
       KEY: ${{ secrets.KEY }}
+
+      #grafana
+      GF_SECURITY_ADMIN_USER: ${{ secrets.GF_SECURITY_ADMIN_USER }}
+      GF_SECURITY_ADMIN_PASSWORD: ${{ secrets.GF_SECURITY_ADMIN_PASSWORD }}
 
     steps:
       - name: Checkout code
@@ -77,6 +82,9 @@ jobs:
             export HOST="${{ env.HOST }}"
             export KEY="${{ env.KEY }}"
             export USERNAME="${{ env.USERNAME }}"
+
+            export GF_SECURITY_ADMIN_USER="${{ env.GF_SECURITY_ADMIN_USER }}"
+            export GF_SECURITY_ADMIN_PASSWORD="${{ env.GF_SECURITY_ADMIN_PASSWORD }}"
             
             
             # 3. Comandos de Deploy
@@ -90,14 +98,14 @@ jobs:
 
             echo "Removing old images..."
             docker image prune -af
-
             
-
             echo "Building and starting new containers..."
             # O Docker Compose usará as variáveis exportadas
+            
+            docker network create grafana-network || true
+            docker compose -f grafana-compose.yml up -d
             docker compose up -d --build
             
-
             echo "Cleaning unused resources..."
             docker system prune -af
 
