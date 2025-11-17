@@ -14,7 +14,6 @@ services:
     ports:
       - '9090:3000'
     environment:
-      #Sugestão de colocar nas variáveis de ambiente
       - GF_SECURITY_ADMIN_USER=${GF_SECURITY_ADMIN_USER}
       - GF_SECURITY_ADMIN_PASSWORD=${GF_SECURITY_ADMIN_PASSWORD}
     depends_on:

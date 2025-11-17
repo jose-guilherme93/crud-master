@@ -19,12 +19,16 @@ services:
       timeout: 5s
       retries: 5
       start_period: 10s
+    networks:
+      - default
 
   app:
     build: .
     container_name: gamecatalog_app
     restart: always
-    
+    networks:
+      - default
+      - grafana-network
     environment:
       
       - PGHOST=${PGHOST}
@@ -41,3 +45,7 @@ services:
 volumes:
   pgdata:
     driver: local
+    
+networks:
+  grafana-network:
+    external: true
