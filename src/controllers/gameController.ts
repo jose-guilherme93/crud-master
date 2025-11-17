@@ -56,7 +56,7 @@ export const getAllGames = async (req: Request, res: Response) => {
     res.status(200).json({ games: response.data })
   } catch(error) {
     logger.error('Erro ao buscar todos os jogos:', error)
-    res.status(500).json({ message: 'Erro interno do servidor.' })
+    res.status(500).json({ message: 'Erro interno do servidor.', error })
   }
 }
 

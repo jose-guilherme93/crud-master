@@ -5,10 +5,10 @@
   "main": "server.js",
   "scripts": {
     "test": "node ./node_modules/vitest/vitest.mjs",
-    "start": "node dist/server.js",
-    "migrate": "node dist/scripts/exec-migrations.js",
+    "start": "NODE_ENV=production node dist/server.js",
+    "migrate": "NODE_ENV=development node dist/scripts/exec-migrations.js",
     "generate:tests": "node generate-tests.js",
-    "dev": "pnpm exec tsx watch src/server.ts --dotenv_config_path=.env.development",
+    "dev": "pnpm exec tsx watch src/server.ts --dotenv_config_path=.env.dev",
     "build": "tsc && tsc-alias && cp -R src/migrations dist/migrations"
   },
   "keywords": [],

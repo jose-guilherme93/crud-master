@@ -4,6 +4,8 @@ services:
   postgres:
     image: postgres:15-alpine
     container_name: gamecatalog_postgres
+    env_file:
+      - .env.development
     restart: always
     environment:
       - POSTGRES_DB=${POSTGRES_DB}
@@ -40,7 +42,7 @@ services:
       - DATABASE_URL=${DATABASE_URL}
       - USERNAME=${USERNAME}
     ports:
-      - "127.0.0.1:3000:3000"
+      - "3000:3000"
 
 volumes:
   pgdata:

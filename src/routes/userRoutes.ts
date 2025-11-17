@@ -1,13 +1,11 @@
-import express, {Router} from 'express'
-import { 
+import express, { Router } from 'express'
+import {
   getUserByIdController,
   createUserController,
   deleteUserController,
   updateUserByIdController,
-  getAllUsers,
-  getSessionByIdController
+  getSessionByIdController,
 } from '../controllers/userController.js'
-
 
 const router: Router = express.Router()
 router.get('/:id', getUserByIdController)

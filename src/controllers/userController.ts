@@ -11,7 +11,7 @@ import {
   getSessionByIdDb,
   getUserByID,
   updateUserDB } from '../models/userModel.js'
-import type { Session } from '@/types/sessions.js'
+import type { Session } from '@/types/session.js'
 import type { QueryResult } from 'pg'
 import type { User } from '@/types/user.js'
 

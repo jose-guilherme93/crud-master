@@ -4,13 +4,8 @@ import LokiTransport from 'winston-loki'
 const { combine, timestamp, printf } = format
 
 const customFormat = printf(info => {
-  const icons = {
-    info: 'ℹ️',
-    warn: '⚠️',
-    error: '❌',
-    debug: '🐛',
-  }
-  return `${info.timestamp} ${icons[info.level as keyof typeof icons] || ''} [${info.level.toUpperCase()}]: ${info.message}`
+
+  return `${info.timestamp} [${info.level.toUpperCase()}]: ${info.message}`
 })
 
 export const logger = createLogger({
