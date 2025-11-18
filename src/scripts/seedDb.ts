@@ -1,12 +1,10 @@
-
 import { pool } from '../utils/connectDatabase.js'
 import { randomUUID } from 'crypto'
-
-
+import { logger } from './logger.js'
 
 const seed = async () => {
   try {
-    console.log('🔄 Limpando tabelas...')
+    logger.info('🔄 Limpando tabelas...')
     await pool.query('DELETE FROM reviews')
     await pool.query('DELETE FROM games')
     await pool.query('DELETE FROM users')
@@ -14,7 +12,7 @@ const seed = async () => {
     const userIds = []
     const gameIds = []
 
-    console.log('👤 Inserindo 500 usuários...')
+    logger.info('👤 Inserindo 500 usuários...')
     for (let i = 1; i <= 500; i++) {
       const id = randomUUID()
       userIds.push(id)
@@ -27,11 +25,11 @@ const seed = async () => {
           `user${i}@example.com`,
           `senha_hash_${i}`,
           `https://example.com/avatar${i}.png`,
-        ]
+        ],
       )
     }
 
-    console.log('🎮 Inserindo 500 jogos...')
+    logger.info('🎮 Inserindo 500 jogos...')
     for (let i = 1; i <= 500; i++) {
       const result = await pool.query(
         `INSERT INTO games (title, rating, status, review, plataform, first_release_date, storyline, cover_url, slug)
@@ -47,12 +45,12 @@ const seed = async () => {
           `História do jogo ${i}`,
           `https://example.com/cover${i}.jpg`,
           `jogo-${i}`,
-        ]
+        ],
       )
       gameIds.push(result.rows[0].id)
     }
 
-    console.log('📝 Inserindo 500 reviews...')
+    logger.info('📝 Inserindo 500 reviews...')
     for (let i = 0; i < 500; i++) {
       await pool.query(
         `INSERT INTO reviews (game_id, user_id, review_text, score)
@@ -62,11 +60,11 @@ const seed = async () => {
           userIds[i],
           `Review do usuário ${i + 1} para o jogo ${i + 1}`,
           (Math.random() * 10).toFixed(1),
-        ]
+        ],
       )
     }
 
-    console.log('✅ Seed finalizado com sucesso!')
+    logger.info('✅ Seed finalizado com sucesso!')
     pool.end()
   } catch (err) {
     console.error('❌ Erro ao rodar seed:', err)

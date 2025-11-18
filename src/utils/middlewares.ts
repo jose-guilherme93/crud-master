@@ -53,7 +53,9 @@ export const requestLogger = (
 
   finished(res, (err) => {
     const duration = Date.now() - start
-    const { method, url } = req
+    const { method, url, originalUrl } = req
+    const userAgent = req.headers['user-agent']
+    const ip = req.ip || req.socket.remoteAddress || 'Unknown'
     const { statusCode } = res
 
     if (err) {
@@ -61,7 +63,7 @@ export const requestLogger = (
       return
     }
 
-    const logMessage = `[HTTP] ${method} ${url} - Status: ${statusCode} - Duração: ${duration}ms`
+    const logMessage = `[HTTP] ${ip} - User Agent: ${userAgent} - ${method} ${originalUrl} - Status: ${statusCode} - Time: ${duration}ms`
 
     if (statusCode >= 500) logger.error(logMessage)
     else if (statusCode >= 400) logger.warn(logMessage)

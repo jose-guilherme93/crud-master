@@ -16,7 +16,7 @@ import type { QueryResult } from 'pg'
 import type { User } from '@/types/user.js'
 
 const ParamsSchema = z.object({
-  id: z.string(),
+  id: z.string('ID inválido.'),
 })
 
 export const getAllUsers = async (req: Request, res: Response) => {
@@ -77,7 +77,7 @@ export const deleteUserController = async (req: Request, res: Response) => {
 
   }   catch(error) {
     logger.error('erro na requisição: ', error)
-    res.status(500).json({ message:'internal server error' })
+    res.status(500).json({ message: error })
   }
 }
 
@@ -89,8 +89,6 @@ export const updateUserByIdController = async (req: Request, res: Response) => {
   const timestamp = now.toISOString().slice(0, 19).replace('T', ' ')
 
   updateUserFromUser['updated_at'] = timestamp
-
-  logger.info('🚀 ~ updateUserByIdController ~ updateUserFromUser:', updateUserFromUser)
 
   try {
 
@@ -106,7 +104,7 @@ export const updateUserByIdController = async (req: Request, res: Response) => {
       return res.status(400).json({ message: 'invalid data', errors: error.issues })
     }
     logger.error('erro ao atualizar usuário: ', error)
-    res.status(500).json({ message: 'internal server error' })
+    res.status(500).json({ error: (error as Error).message })
   }
 }
 
@@ -127,7 +125,7 @@ export const getUserByIdController = async (req: Request, res: Response) => {
 
     res.status(500).json({
       message: 'internal server error',
-      error,
+      error: (error as Error).message,
     })
 
   }
@@ -151,9 +149,8 @@ export const getSessionByIdController = async (req: Request, res: Response)  => 
     }
     logger.error('erro ao buscar sessões no banco: ', error)
 
-    res.status(500).json({
-      message: 'internal server error',
-      error,
+    res.status(400).json({
+      error: (error as Error).message,
     })
 
   }
