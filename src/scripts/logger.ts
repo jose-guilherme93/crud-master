@@ -1,7 +1,7 @@
 import { createLogger, format, transports } from 'winston'
 import LokiTransport from 'winston-loki'
 
-const { combine, timestamp, printf } = format
+const { combine, timestamp, printf, splat } = format
 
 const customFormat = printf(info => {
 
@@ -13,6 +13,7 @@ export const logger = createLogger({
   format: combine(
     timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
     customFormat,
+    splat(),
   ),
   transports: [
     new transports.Console(),
@@ -24,6 +25,7 @@ export const logger = createLogger({
       level: 'silly',
       format: format.combine(
         format.timestamp(),
+        format.splat(),
         format.json(),
       ),
     }),

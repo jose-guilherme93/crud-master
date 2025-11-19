@@ -12,6 +12,9 @@ const emailSchema = z.object({
 
 export const recoveryController = async (req: Request, res: Response) => {
   const { email }  = req.body
+  if (!email) {
+    return res.status(400).json({ message: 'insira um email válido' })
+  }
   emailSchema.parse({ email })
   logger.info(`try to recovery password with: ${email}`)
   const recoveryToken = crypto.randomBytes(32).toString('hex')
@@ -25,33 +28,45 @@ export const recoveryController = async (req: Request, res: Response) => {
     await insertRecoveryTokenInDB(responseDbSearch.rows[0]!, recoveryToken)
   }
 
-  const transporter = createTransport({
-    host: 'sandbox.smtp.mailtrap.io',
-    port: 2525,
-    auth: {
-      user: process.env.USERNAME_MAILER,
-      pass: process.env.USER_PASSWORD_TRANSPORTER_MAILER,
+  try {
+    const transporter = createTransport({
+      host: 'sandbox.smtp.mailtrap.io',
+      port: 2525,
+      auth: {
+        user: process.env.USERNAME_MAILER!,
+        pass: process.env.USER_PASSWORD_TRANSPORTER_MAILER!,
+      },
+    })
+    transporter.verify((error, sucess) => {
+      logger.info(`Transporter verify error: ${error}`)
+      logger.info(`Transporter verify sucess: ${sucess}`)
     },
-  })
-
-  const sendEmail = async () => {
-    const info = await transporter.sendMail({
-      from: '"Maddison Foo Koch" <maddison53@ethereal.email>',
-      to: 'bar@example.com, baz@example.com',
-      subject: 'Redefinição de senha de usuário',
-      text: '',
-      html: `<p> Para redefinir sua senha, clique no link abaixo <p/>
+    )
+    const userEmail = responseDbSearch.rows[0]!.email
+    async function sendEmail() { {
+      const infoTransporterSendmail = await transporter.sendMail({
+        from: '"Maddison Foo Koch" <maddison53@ethereal.email>',
+        to: userEmail?.toString(),
+        subject: 'Redefinição de senha de usuário',
+        text: '',
+        html: `<p> Para redefinir sua senha GameCatalog, clique no link abaixo <p/>
     <a href="http://localhost:3000/auth/reset-password/?recoveryToken=${recoveryToken}">
             Redefinir Senha
-          </a>`,
+          </a>
+          <p> Se você não solicitou essa alteração, ignore este e-mail. <p/>`,
+      })
+      logger.info(`infoTransporterSendmail.messageId:', ${infoTransporterSendmail.messageId}`)
+      logger.info(`infoTransporterSendmail.rejected:, ${infoTransporterSendmail.rejected}`)
+      logger.info(`infoTransporterSendmail.response:, ${infoTransporterSendmail.response}`)
 
-    })
+    } }
 
-    logger.info('Message sent:', info.messageId)
+    sendEmail().catch((error) => logger.error('Error in sendEmail function:', error))
+  } catch (error) {
+    logger.error('Error sending email:',  error)
   }
 
-  sendEmail().catch(console.error)
-
+  logger.info('email found, recovery token inserted in db')
   res.status(200).json({
     message: 'email encontrado. inserindo na tabela recovery...',
     data: responseDbSearch.rows[0]!.email,
