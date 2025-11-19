@@ -3,16 +3,17 @@ import { pool } from '@/utils/connectDatabase.js'
 import { z } from 'zod'
 
 const checkUserSchema = z.object({
-  email: z.email(),
+  email: z.email('Email inválido.'),
 })
 
 type checkUserType = z.infer<typeof checkUserSchema>
 
-export const checkUser = async (userData: checkUserType) => {
-  checkUserSchema.parse(userData.email)
+export const checkUser = async (userEmail: checkUserType) => {
+
+  const parsed = checkUserSchema.parse(userEmail)
   const ifUserExistsQuery = 'SELECT * FROM USERS WHERE email = $1'
-  const checkResult = await pool.query(ifUserExistsQuery, [userData.email])
-  return checkResult.rows
+  const checkResult = await pool.query(ifUserExistsQuery, [parsed.email]) // Usa parsed.email
+  return checkResult
 }
 
 export const createUserDB = async (newUser: User) => {
@@ -31,7 +32,7 @@ export const createUserDB = async (newUser: User) => {
     RETURNING *;
     `
   const result = await pool.query(query, [id, username, email, password_hash, avatar])
-  return result.rows[0]
+  return result
 }
 
 export const deleteUserDB = async (id: string) => {
