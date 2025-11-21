@@ -5,8 +5,8 @@ import { logger } from '@/scripts/logger.js'
 interface ReviewParams {
   user_id: string
   game_id: string
-  score: number
-  review_text: string
+  score?: number
+  review_text?: string
 }
 
 export async function checkExistingReview(user_id: string, game_id: string) {
@@ -71,3 +71,7 @@ export async function deleteReviewDB(params: { game_id: string; user_id: string 
     throw error
   }
 }
+
+//export async function updateReviewDB(params: ReviewParams): Promise<Review | null> {
+
+//}

@@ -68,8 +68,8 @@ export async function deleteReviewController(req: Request, res: Response) {
   if(parsedParams.error) {
     logger.error(`Parâmetros inválidos para deletar review:', ${parsedParams.error}`)
     return res.status(400).json({ error: 'Parâmetros inválidos para deletar review' })
-
   }
+
   try {
     const searchReview = await deleteReviewDB(reqParams)
     if(searchReview.rowCount! == 0) {
@@ -83,6 +83,41 @@ export async function deleteReviewController(req: Request, res: Response) {
     res.status(500).json({ error: 'Erro ao deletar review' })
   }
 }
-export const updateReviewController = async () => {
+
+const updateParamsSchema = zod.object({
+  user_id: zod.uuid(),
+  game_id: zod.string().min(1),
+})
+
+const updateReviewSchema = zod.object({
+  score: zod.number().min(0).max(10).optional(),
+  review_text: zod.string().min(1).max(5000).optional(),
+})
+export async function updateReviewController(req: Request, res: Response) {
+  logger.info('Atualizando review...')
+
+  const reqParams = {
+    user_id: req.params.user_id!,
+    game_id: req.params.game_id!,
+  }
+
+  const reqBody = {
+    score: req.body?.score,
+    review_text: req.body?.review_text,
+  }
+
+  const parsedParams = updateParamsSchema.safeParse(reqParams)
+  const parsedBody = updateReviewSchema.safeParse(reqBody)
+
+  if(parsedParams.error) {
+    logger.info(parsedParams.data)
+    logger.error(`Parâmetros inválidos para atualizar review: ${parsedParams.error.message}`)
+    return res.status(400).json({ error: 'Parâmetros inválidos para atualizar review' })
+  }
+  if(parsedBody.error) {
+    logger.info(parsedBody.data)
+    logger.error(`Dados inválidos para atualizar review: ${parsedBody.error.message}`)
+    return res.status(400).json({ error: 'Dados inválidos para atualizar review' })
+  }
 
 }

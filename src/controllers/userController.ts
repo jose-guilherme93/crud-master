@@ -6,6 +6,7 @@ import * as z from 'zod'
 import type { Session } from '@/types/session.js'
 import type { QueryResult } from 'pg'
 import type { User } from '@/types/user.js'
+type SessionQueryResult = QueryResult<Session>
 
 import {
   checkUser,
@@ -156,7 +157,6 @@ export const getUserByIdController = async (req: Request, res: Response) => {
   }
 }
 
-type SessionQueryResult = QueryResult<Session>
 export const getSessionByIdController = async (req: Request, res: Response)  => {
   const { id } = ParamsSchema.parse(req.params)
 

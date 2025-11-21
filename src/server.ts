@@ -33,12 +33,6 @@ app.use((req, res) => {
   res.json({ message: 'Rota não encontrada', url:req.originalUrl })
 })
 
-app.use((err: ErrorRequestHandler, req: express.Request, res: express.Response, next: NextFunction) => {
-  logger.error(`Erro no servidor: ${err}`)
-  next(err as Errback)
-  res.status(500).json({ error: 'Erro interno no servidor' })
-})
-
 app.listen(PORT, '0.0.0.0', () => {
   logger.info('server is running')
 
