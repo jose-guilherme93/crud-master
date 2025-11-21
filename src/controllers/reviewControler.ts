@@ -1,6 +1,6 @@
 import type { Response, Request } from 'express'
 import { logger } from '@/scripts/logger.js'
-import { checkExistingReview, createReviewDB, getReviewByIdDB } from '../models/reviewModel.js'
+import { checkExistingReview, createReviewDB, deleteReviewDB, getReviewByIdDB } from '../models/reviewModel.js'
 import * as zod from 'zod'
 import type { Review } from '@/types/review.js'
 
@@ -49,10 +49,40 @@ export async function createReviewController(req: Request, res: Response) {
   }
 }
 
-export const deleteReviewController = async () => {
+const deleteReviewParamsSchema = zod.object({
+  user_id: zod.uuid(),
+  game_id: zod.string().min(1),
+})
+export async function deleteReviewController(req: Request, res: Response) {
+  logger.info('deletando review...')
+  const reqParams = {
+    game_id:  req.params.game_id!,
+    user_id: req.params.user_id!,
+  }
 
+  if (!reqParams.game_id || !reqParams.user_id) {
+    return res.status(400).json({ error: 'Parâmetros obrigatórios ausentes' })
+  }
+
+  const parsedParams = deleteReviewParamsSchema.safeParse(reqParams)
+  if(parsedParams.error) {
+    logger.error(`Parâmetros inválidos para deletar review:', ${parsedParams.error}`)
+    return res.status(400).json({ error: 'Parâmetros inválidos para deletar review' })
+
+  }
+  try {
+    const searchReview = await deleteReviewDB(reqParams)
+    if(searchReview.rowCount! == 0) {
+      logger.warn('Review não encontrado para deletar.')
+      return res.status(404).json({ error: 'Review não encontrado para deletar' })
+    }
+    logger.info(`Review deletado com sucesso: ${searchReview}`)
+    res.status(200).json({ message: 'Review deletado com sucesso' })
+  } catch (err) {
+    logger.error('Erro ao deletar review:', err)
+    res.status(500).json({ error: 'Erro ao deletar review' })
+  }
 }
-
 export const updateReviewController = async () => {
 
 }

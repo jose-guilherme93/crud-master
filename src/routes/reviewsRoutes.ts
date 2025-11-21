@@ -8,6 +8,6 @@ const router: Router = express.Router()
 
 router.get('/:game_id', getReviewByGameIdController)
 router.post('/', createReviewController)
-router.delete('/', deleteReviewController)
+router.delete('/:user_id/:game_id', deleteReviewController)
 router.put('/', updateReviewController)
 export default router

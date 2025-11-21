@@ -41,17 +41,33 @@ export async function createReviewDB(params: ReviewParams): Promise<Review> {
   }
 }
 
-export async function getReviewByIdDB(parseReviewGameId: string): Promise<Review | null> {
+export async function getReviewByIdDB(parsedReviewGameId: string): Promise<Review | null> {
   const query = `
     SELECT * FROM reviews
     WHERE game_id = $1;
   `
-
   try {
-    const response = await pool.query(query, [parseReviewGameId])
+    const response = await pool.query(query, [parsedReviewGameId])
     return response.rows[0] || null
   } catch (error) {
     logger.error('Erro ao buscar review por ID:', error)
+    throw error
+  }
+}
+
+export async function deleteReviewDB(params: { game_id: string; user_id: string }) {
+  const query = `
+    DELETE FROM reviews
+    WHERE user_id = $1 AND game_id = $2;
+  `
+  try {
+    const response = await pool.query(query, [params.user_id, params.game_id])
+    if(response.rowCount === 0) {
+      logger.warn('Nenhum review encontrado para deletar com os parâmetros fornecidos.')
+    }
+    return response
+  } catch (error) {
+    logger.error('Erro ao deletar review DB:', error)
     throw error
   }
 }

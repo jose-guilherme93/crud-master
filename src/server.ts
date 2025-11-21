@@ -1,6 +1,6 @@
 import * as dotenv from 'dotenv'
 import * as path from 'path'
-import express from 'express'
+import express, { type Errback, type ErrorRequestHandler, type NextFunction } from 'express'
 import userRoutes from './routes/userRoutes.js'
 import gameRoutes from './routes/gameRoutes.js'
 import reviewsRoutes from './routes/reviewsRoutes.js'
@@ -31,6 +31,12 @@ app.use('/reviews', reviewsRoutes)
 
 app.use((req, res) => {
   res.json({ message: 'Rota não encontrada', url:req.originalUrl })
+})
+
+app.use((err: ErrorRequestHandler, req: express.Request, res: express.Response, next: NextFunction) => {
+  logger.error(`Erro no servidor: ${err}`)
+  next(err as Errback)
+  res.status(500).json({ error: 'Erro interno no servidor' })
 })
 
 app.listen(PORT, '0.0.0.0', () => {
