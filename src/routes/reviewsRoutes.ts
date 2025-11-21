@@ -2,10 +2,11 @@ import express, { Router } from 'express'
 import {
   createReviewController,
   deleteReviewController,
-  updateReviewController } from '../controllers/reviewControler.js'
+  updateReviewController,
+  getReviewByGameIdController } from '@/controllers/reviewControler.js'
 const router: Router = express.Router()
 
-//router.get('/', getReviewByIdController)
+router.get('/:game_id', getReviewByGameIdController)
 router.post('/', createReviewController)
 router.delete('/', deleteReviewController)
 router.put('/', updateReviewController)
