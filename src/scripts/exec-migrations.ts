@@ -1,16 +1,16 @@
-
-import { configDotenv } from 'dotenv'
-configDotenv()
+import * as dotenv from 'dotenv'
+import * as path from 'path'
+const env = process.env.NODE_ENV || 'development'
+const envFile = `.env.${env}`
+dotenv.config({ path: path.resolve(process.cwd(), envFile) })
 import { Client } from 'pg'
 import fs from 'node:fs'
-import path from 'node:path'
+
 import { fileURLToPath } from 'node:url'
 import { logger } from './logger.js'
 
-
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
-
 
 const client = new Client({
   host: process.env.PGHOST,

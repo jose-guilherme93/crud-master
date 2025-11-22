@@ -37,7 +37,9 @@ export const getGameByIdController = async (req: Request, res: Response) => {
       return res.status(400).json({ message: 'Dados inválidos.', errors: error.issues })
     }
     logger.error('Erro ao buscar jogo por ID:', error)
-    res.status(500).json({ message: 'Erro interno do servidor.' })
+    res.status(500).json({ message: 'Erro interno do servidor.',
+      error: error instanceof Error ? error.message : String(error),
+    })
   }
 }
 
@@ -55,7 +57,7 @@ export const getAllGames = async (req: Request, res: Response) => {
     const response = await getAllGamesDB(filters)
     res.status(200).json({ games: response.data })
   } catch(error) {
-    logger.error('Erro ao buscar todos os jogos:', error)
+    logger.error(`Erro ao buscar todos os jogos: ${error}`)
     res.status(500).json({ message: 'Erro interno do servidor.', error })
   }
 }
@@ -109,7 +111,7 @@ export const updateGameController = async (req: Request, res: Response) => {
     }
   } catch(error) {
     if (error instanceof z.ZodError) {
-      return res.status(400).json({ message: 'Dados inválidos para atualização.', errors: error.issues })
+      return res.status(400).json({ message: 'Dados inválidos para atualização.', errors: error.message })
     }
     logger.error('Erro ao atualizar jogo no banco: ', error)
     res.status(500).json({ message: 'Erro interno do servidor.' })

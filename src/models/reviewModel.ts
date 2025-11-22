@@ -72,6 +72,26 @@ export async function deleteReviewDB(params: { game_id: string; user_id: string 
   }
 }
 
-//export async function updateReviewDB(params: ReviewParams): Promise<Review | null> {
+export async function updateReviewDB(params: ReviewParams): Promise<Review | null> {
+  logger.info(`atualizando review no model: ${params}`)
 
-//}
+  const keysToUpdate = Object.keys(params)
+  const valeusToUpdate = Object.values(params)
+  const setString = keysToUpdate
+    .map((key, index) => `${key} = $${index + 1}`)
+    .join(', ')
+
+  const query = `
+    UPDATE reviews
+    SET ${setString}
+    WHERE user_id = $${valeusToUpdate.length + 1} AND game_id = $${valeusToUpdate.length + 2}
+    RETURNING *;
+    `
+  try {
+    const response = await pool.query(query, [...valeusToUpdate, params.user_id!, params.game_id!])
+    return response.rows[0] || null
+  } catch (error) {
+    logger.error('Erro ao atualizar review DB:', error)
+    throw error
+  }
+}

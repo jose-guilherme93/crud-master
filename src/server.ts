@@ -1,13 +1,12 @@
 import * as dotenv from 'dotenv'
 import * as path from 'path'
-import express, { type Errback, type ErrorRequestHandler, type NextFunction } from 'express'
+import express from 'express'
 import userRoutes from './routes/userRoutes.js'
 import gameRoutes from './routes/gameRoutes.js'
 import reviewsRoutes from './routes/reviewsRoutes.js'
 import authRoutes from './routes/authRoutes.js'
 import { logger } from './scripts/logger.js'
 import { requestLogger } from './utils/middlewares.js'
-
 const env = process.env.NODE_ENV || 'development'
 const envFile = `.env.${env}`
 dotenv.config({ path: path.resolve(process.cwd(), envFile), quiet: true })

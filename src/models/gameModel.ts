@@ -79,14 +79,14 @@ export const createGame = async (bodyParams: GameCreationParams) => {
   } = bodyParams
 
   const query = `INSERT INTO "games" (title,
-         rating,
-          status,
-           review,
-            plataform,
-            first_release_date,
-            storyline,
-            cover_url,
-            slug) 
+        rating,
+        status,
+        review,
+        plataform,
+        first_release_date,
+        storyline,
+        cover_url,
+        slug) 
   VALUES ($1,$2, $3, $4, $5, $6,$7,$8,$9) 
   RETURNING *;
 `

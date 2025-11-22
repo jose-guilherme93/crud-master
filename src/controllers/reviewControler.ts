@@ -1,33 +1,49 @@
 import type { Response, Request } from 'express'
 import { logger } from '@/scripts/logger.js'
-import { checkExistingReview, createReviewDB, deleteReviewDB, getReviewByIdDB } from '../models/reviewModel.js'
+import { checkExistingReview, createReviewDB, deleteReviewDB, getReviewByIdDB, updateReviewDB } from '../models/reviewModel.js'
 import * as zod from 'zod'
 import type { Review } from '@/types/review.js'
 
-const reviewCreateSchema = zod.object({
+const createReviewSchema = zod.object({
   user_id: zod.string(),
   game_id: zod.string(),
   score: zod.number().min(0).max(10),
   review_text: zod.string().min(1).max(500),
 }) satisfies zod.ZodType<Review>
 
-const reviewSchema = zod.string()
+const deleteReviewParamsSchema = zod.object({
+  user_id: zod.uuid(),
+  game_id: zod.string().min(1),
+})
+
+const updateReviewParamsSchema = zod.object({
+  user_id: zod.uuid(),
+  game_id: zod.string().min(1),
+})
+
+const updateReviewBodyParamsSchema = zod.object({
+  score: zod.number().min(0).max(10).optional(),
+  review_text: zod.string().min(1).max(5000).optional(),
+})
+const reviewIdSchema = zod.string()
 
 export async function getReviewByGameIdController(req: Request, res: Response) {
-  const parseReviewGameId = reviewSchema.safeParse(req.params.game_id)
+  logger.info('buscando review por game_id...')
+  const parseReviewGameId = reviewIdSchema.safeParse(req.params.game_id)
 
   const searchReview = await getReviewByIdDB(parseReviewGameId.data!)
   res.status(200).json({ message: 'Review encontrado com sucesso', review: searchReview })
 }
 
 export async function createReviewController(req: Request, res: Response) {
+  logger.info('criando nova review...')
   const reqParams: Review = {
     review_text: req.body.review_text,
     score: req.body.score,
     game_id: req.body.game_id,
     user_id: req.body.user_id,
   }
-  reviewCreateSchema.safeParse(reqParams)
+  createReviewSchema.safeParse(reqParams)
   try {
 
     const checkResult = await checkExistingReview(reqParams.user_id, reqParams.game_id)
@@ -49,10 +65,6 @@ export async function createReviewController(req: Request, res: Response) {
   }
 }
 
-const deleteReviewParamsSchema = zod.object({
-  user_id: zod.uuid(),
-  game_id: zod.string().min(1),
-})
 export async function deleteReviewController(req: Request, res: Response) {
   logger.info('deletando review...')
   const reqParams = {
@@ -72,6 +84,7 @@ export async function deleteReviewController(req: Request, res: Response) {
 
   try {
     const searchReview = await deleteReviewDB(reqParams)
+
     if(searchReview.rowCount! == 0) {
       logger.warn('Review não encontrado para deletar.')
       return res.status(404).json({ error: 'Review não encontrado para deletar' })
@@ -84,15 +97,6 @@ export async function deleteReviewController(req: Request, res: Response) {
   }
 }
 
-const updateParamsSchema = zod.object({
-  user_id: zod.uuid(),
-  game_id: zod.string().min(1),
-})
-
-const updateReviewSchema = zod.object({
-  score: zod.number().min(0).max(10).optional(),
-  review_text: zod.string().min(1).max(5000).optional(),
-})
 export async function updateReviewController(req: Request, res: Response) {
   logger.info('Atualizando review...')
 
@@ -106,8 +110,8 @@ export async function updateReviewController(req: Request, res: Response) {
     review_text: req.body?.review_text,
   }
 
-  const parsedParams = updateParamsSchema.safeParse(reqParams)
-  const parsedBody = updateReviewSchema.safeParse(reqBody)
+  const parsedParams = updateReviewParamsSchema.safeParse(reqParams)
+  const parsedBody = updateReviewBodyParamsSchema.safeParse(reqBody)
 
   if(parsedParams.error) {
     logger.info(parsedParams.data)
@@ -118,6 +122,32 @@ export async function updateReviewController(req: Request, res: Response) {
     logger.info(parsedBody.data)
     logger.error(`Dados inválidos para atualizar review: ${parsedBody.error.message}`)
     return res.status(400).json({ error: 'Dados inválidos para atualizar review' })
+  }
+
+  try {
+
+    const existingReview = await checkExistingReview(parsedParams.data.user_id, parsedParams.data.game_id)
+    if(existingReview.rowCount === 0) {
+      logger.warn('Review não encontrado para atualizar.')
+      return res.status(404).json({ error: 'Review não encontrado para atualizar' })
+    }
+
+    const updateReview = await updateReviewDB({
+      user_id: parsedParams.data.user_id!,
+      game_id: parsedParams.data.game_id!,
+      score: parsedBody.data.score!,
+      review_text: parsedBody.data.review_text!,
+
+    })
+    if(!updateReview) {
+      logger.error('Erro ao atualizar review no banco de dados.')
+      return res.status(500).json({ error: 'Erro ao atualizar review no banco de dados.' })
+    }
+    res.status(200).json({ message: 'Review atualizado com sucesso', review: updateReview })
+
+  } catch(err) {
+    logger.error('error ao atualizar review:', err)
+    res.status(500).json({ error: 'errro ao atualizar review', err })
   }
 
 }
