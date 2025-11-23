@@ -15,18 +15,21 @@ const PORT = Number(process.env.SERVER_PORT) || 3000
 
 const app = express()
 
-app.use(express.json())
 app.use(requestLogger)
+app.use(express.json())
+app.use(express.urlencoded({ extended: true, limit: '10kb' }))
+
+app.use('/favicon.png', (req, res) => res.status(204).end())
 app.get('/', (req, res) => res.status(200).json({
   message: 'Gamecatalog API',
   version: 'v0.1',
 }))
 app.get('/health', (req, res) => res.status(200).json({ message: 'Server UP' }))
-
 app.use('/auth', authRoutes)
 app.use('/users', userRoutes)
 app.use('/games', gameRoutes)
 app.use('/reviews', reviewsRoutes)
+app.use('/docs', express.static('src/docs'))
 
 app.use((req, res) => {
   res.json({ message: 'Rota não encontrada', url:req.originalUrl })

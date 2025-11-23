@@ -8,12 +8,12 @@ import { pool } from '@/utils/connectDatabase.js'
 const userSchema = z.object({
   email: z
     .email('formato de email inválido')
-    .min(4)
+    .min(1)
     .max(100),
-  password_hash: z
-    .string()
-    .min(8, 'a senha deve conter ao menos 8 caracteres')
-    .max(64, 'a senha deve conter no máximo 64 caracteres'),
+  password_hash:
+    z.string()
+      .min(8, 'a senha deve conter ao menos 8 caracteres')
+      .max(64, 'a senha deve conter no máximo 64 caracteres'),
 })
 
 export const loginController = async (req: Request, res: Response) => {
@@ -22,11 +22,16 @@ export const loginController = async (req: Request, res: Response) => {
   const ip = req.get('x-forwarded-for') || req.socket.remoteAddress
   const browser = req.headers['user-agent']
 
-  userSchema.parse({ email, password_hash })
+  const parsed = userSchema.safeParse({ email, password_hash })
   logger.info(`try to login with ${email} email`)
 
   try {
-    const responseDBSearch = await searchUserByEmail(email)
+    if (!parsed.success) {
+      logger.warn('Invalid input for login', parsed.error.issues)
+      return res.status(400).json({ message: 'Invalid email or password format', errors: parsed.error.message })
+    }
+
+    const responseDBSearch = await searchUserByEmail(parsed.data.email)
     if (!responseDBSearch || password_hash !== responseDBSearch.password_hash) {
       logger.warn('invalid email or password')
       return res.status(404).json({ message: 'invalid email or password' })
@@ -73,7 +78,7 @@ export const loginController = async (req: Request, res: Response) => {
       sessionToken,
     })
   } catch (error) {
-    logger.error(error)
+    logger.error(`error ao logar: ${error}`)
 
     res.status(500).json({ message: 'Erro interno no servidor' })
     throw error
